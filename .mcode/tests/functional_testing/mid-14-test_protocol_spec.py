@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-02-14T03:48:24.910212+00:00
+Generated at: 2026-02-14T03:56:39.729677+00:00
 Project: flask-rest-api-jwt
 Milestone: 14
 """
@@ -34,7 +34,7 @@ TEST_CASES = json.loads(r'''[
         "category": "HAPPY_PATH",
         "endpoint": "/health/",
         "method": "GET",
-        "description": "Verify the health endpoint returns 200 with healthy status when the application and database are running normally",
+        "description": "Verify the health endpoint returns 200 with healthy status",
         "request_data": {
             "path": {},
             "query": {},
@@ -45,18 +45,232 @@ TEST_CASES = json.loads(r'''[
         "cleanup": null
     },
     {
-        "name": "health_check_response_structure",
+        "name": "register_user_happy_path",
         "category": "HAPPY_PATH",
-        "endpoint": "/health/",
-        "method": "GET",
-        "description": "Verify the health endpoint response contains both 'status' and 'database' fields with value 'healthy'",
+        "endpoint": "/user/register",
+        "method": "POST",
+        "description": "Register a new user successfully",
         "request_data": {
             "path": {},
             "query": {},
-            "body": null
+            "body": {
+                "username": "newuser_reg_test",
+                "password": "password123"
+            }
+        },
+        "expected_status": 201,
+        "setup": null,
+        "cleanup": null
+    },
+    {
+        "name": "register_user_duplicate",
+        "category": "EDGE_CASE",
+        "endpoint": "/user/register",
+        "method": "POST",
+        "description": "Registering a duplicate user returns 400",
+        "request_data": {
+            "path": {},
+            "query": {},
+            "body": {
+                "username": "dupuser_test",
+                "password": "password123"
+            }
+        },
+        "expected_status": 400,
+        "setup": {
+            "endpoint": "/user/register",
+            "method": "POST",
+            "body": {
+                "username": "dupuser_test",
+                "password": "password123"
+            }
+        },
+        "cleanup": null
+    },
+    {
+        "name": "login_user_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/user/login",
+        "method": "POST",
+        "description": "Login with valid credentials returns access and refresh tokens",
+        "request_data": {
+            "path": {},
+            "query": {},
+            "body": {
+                "username": "loginuser_test",
+                "password": "password123"
+            }
+        },
+        "expected_status": 200,
+        "setup": {
+            "endpoint": "/user/register",
+            "method": "POST",
+            "body": {
+                "username": "loginuser_test",
+                "password": "password123"
+            }
+        },
+        "cleanup": null
+    },
+    {
+        "name": "login_user_invalid_credentials",
+        "category": "EDGE_CASE",
+        "endpoint": "/user/login",
+        "method": "POST",
+        "description": "Login with invalid credentials returns 401",
+        "request_data": {
+            "path": {},
+            "query": {},
+            "body": {
+                "username": "nonexistentuser",
+                "password": "wrongpassword"
+            }
+        },
+        "expected_status": 401,
+        "setup": null,
+        "cleanup": null
+    },
+    {
+        "name": "refresh_token_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/user/refresh",
+        "method": "POST",
+        "description": "Refresh access token using a valid refresh token",
+        "request_data": {
+            "path": {},
+            "query": {},
+            "body": {},
+            "headers": {
+                "Authorization": "Bearer $fresh_refresh_token"
+            }
         },
         "expected_status": 200,
         "setup": null,
+        "cleanup": null
+    },
+    {
+        "name": "logout_user_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/user/logout",
+        "method": "POST",
+        "description": "Logout the authenticated user",
+        "request_data": {
+            "path": {},
+            "query": {},
+            "body": {},
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
+            }
+        },
+        "expected_status": 200,
+        "setup": null,
+        "cleanup": null
+    },
+    {
+        "name": "create_store_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/store/",
+        "method": "POST",
+        "description": "Create a new store for the authenticated user",
+        "request_data": {
+            "path": {},
+            "query": {},
+            "body": {
+                "name": "Test Store"
+            },
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
+            }
+        },
+        "expected_status": 201,
+        "setup": null,
+        "cleanup": null
+    },
+    {
+        "name": "list_stores_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/store/s",
+        "method": "GET",
+        "description": "List all stores for the authenticated user",
+        "request_data": {
+            "path": {},
+            "query": {},
+            "body": null,
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
+            }
+        },
+        "expected_status": 200,
+        "setup": null,
+        "cleanup": null
+    },
+    {
+        "name": "get_store_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/store/{id}",
+        "method": "GET",
+        "description": "Get a store by ID",
+        "request_data": {
+            "path": {
+                "id": "$setup_id"
+            },
+            "query": {},
+            "body": null,
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
+            }
+        },
+        "expected_status": 200,
+        "setup": {
+            "endpoint": "/store/",
+            "method": "POST",
+            "body": {
+                "name": "Store For Get Test"
+            },
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
+            },
+            "extract_id_from": "id"
+        },
+        "cleanup": {
+            "endpoint": "/store/{id}",
+            "method": "DELETE",
+            "path": {
+                "id": "$setup_id"
+            },
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
+            }
+        }
+    },
+    {
+        "name": "delete_store_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/store/{id}",
+        "method": "DELETE",
+        "description": "Delete a store by ID",
+        "request_data": {
+            "path": {
+                "id": "$setup_id"
+            },
+            "query": {},
+            "body": null,
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
+            }
+        },
+        "expected_status": 200,
+        "setup": {
+            "endpoint": "/store/",
+            "method": "POST",
+            "body": {
+                "name": "Store For Delete Test"
+            },
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
+            },
+            "extract_id_from": "id"
+        },
         "cleanup": null
     }
 ]''')
