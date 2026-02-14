@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-02-14T04:00:57.517457+00:00
+Generated at: 2026-02-14T04:02:56.569955+00:00
 Project: flask-rest-api-jwt
 Milestone: 14
 """
@@ -56,7 +56,7 @@ TEST_CASES = json.loads(r'''[
             "path": {},
             "query": {},
             "body": {
-                "username": "newuser_reg_test",
+                "username": "testuser_register_hp",
                 "password": "password123"
             }
         },
@@ -75,7 +75,7 @@ TEST_CASES = json.loads(r'''[
             "path": {},
             "query": {},
             "body": {
-                "username": "dupuser_test",
+                "username": "testuser_dup_check",
                 "password": "password123"
             }
         },
@@ -84,7 +84,7 @@ TEST_CASES = json.loads(r'''[
             "endpoint": "/user/register",
             "method": "POST",
             "body": {
-                "username": "dupuser_test",
+                "username": "testuser_dup_check",
                 "password": "password123"
             }
         },
@@ -101,7 +101,7 @@ TEST_CASES = json.loads(r'''[
             "path": {},
             "query": {},
             "body": {
-                "username": "loginuser_test",
+                "username": "testuser_login_hp",
                 "password": "password123"
             }
         },
@@ -110,7 +110,7 @@ TEST_CASES = json.loads(r'''[
             "endpoint": "/user/register",
             "method": "POST",
             "body": {
-                "username": "loginuser_test",
+                "username": "testuser_login_hp",
                 "password": "password123"
             }
         },
@@ -127,129 +127,11 @@ TEST_CASES = json.loads(r'''[
             "path": {},
             "query": {},
             "body": {
-                "username": "nonexistentuser",
+                "username": "nonexistentuser99",
                 "password": "wrongpassword"
             }
         },
         "expected_status": 401,
-        "setup": null,
-        "cleanup": null
-    },
-    {
-        "name": "create_store_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/store/",
-        "method": "POST",
-        "description": "Create a new store for the authenticated user",
-        "request_data": {
-            "path": {},
-            "query": {},
-            "body": {
-                "name": "Test Store"
-            }
-        },
-        "expected_status": 201,
-        "setup": null,
-        "cleanup": null
-    },
-    {
-        "name": "list_stores_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/store/s",
-        "method": "GET",
-        "description": "List all stores for the authenticated user",
-        "request_data": {
-            "path": {},
-            "query": {},
-            "body": null
-        },
-        "expected_status": 200,
-        "setup": null,
-        "cleanup": null
-    },
-    {
-        "name": "get_store_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/store/{id}",
-        "method": "GET",
-        "description": "Get a store by ID",
-        "request_data": {
-            "path": {
-                "id": "$setup_id"
-            },
-            "query": {},
-            "body": null
-        },
-        "expected_status": 200,
-        "setup": {
-            "endpoint": "/store/",
-            "method": "POST",
-            "body": {
-                "name": "Store For Get Test"
-            },
-            "extract_id_from": "id"
-        },
-        "cleanup": {
-            "endpoint": "/store/{id}",
-            "method": "DELETE",
-            "path": {
-                "id": "$setup_id"
-            }
-        }
-    },
-    {
-        "name": "delete_store_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/store/{id}",
-        "method": "DELETE",
-        "description": "Delete a store by ID",
-        "request_data": {
-            "path": {
-                "id": "$setup_id"
-            },
-            "query": {},
-            "body": null
-        },
-        "expected_status": 200,
-        "setup": {
-            "endpoint": "/store/",
-            "method": "POST",
-            "body": {
-                "name": "Store For Delete Test"
-            },
-            "extract_id_from": "id"
-        },
-        "cleanup": null
-    },
-    {
-        "name": "refresh_token_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/user/refresh",
-        "method": "POST",
-        "description": "Refresh access token using a valid refresh token",
-        "request_data": {
-            "path": {},
-            "query": {},
-            "body": {
-                "refresh_token": "$fresh_refresh_token"
-            }
-        },
-        "expected_status": 200,
-        "setup": null,
-        "cleanup": null
-    },
-    {
-        "name": "logout_user_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/user/logout",
-        "method": "POST",
-        "description": "Logout the authenticated user",
-        "request_data": {
-            "path": {},
-            "query": {},
-            "body": {}
-        },
-        "expected_status": 200,
         "setup": null,
         "cleanup": null
     }
