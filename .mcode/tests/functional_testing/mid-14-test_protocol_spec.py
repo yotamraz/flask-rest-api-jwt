@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-02-14T03:56:39.729677+00:00
+Generated at: 2026-02-14T04:00:57.517457+00:00
 Project: flask-rest-api-jwt
 Milestone: 14
 """
@@ -35,6 +35,7 @@ TEST_CASES = json.loads(r'''[
         "endpoint": "/health/",
         "method": "GET",
         "description": "Verify the health endpoint returns 200 with healthy status",
+        "skip_auth": true,
         "request_data": {
             "path": {},
             "query": {},
@@ -50,6 +51,7 @@ TEST_CASES = json.loads(r'''[
         "endpoint": "/user/register",
         "method": "POST",
         "description": "Register a new user successfully",
+        "skip_auth": true,
         "request_data": {
             "path": {},
             "query": {},
@@ -68,6 +70,7 @@ TEST_CASES = json.loads(r'''[
         "endpoint": "/user/register",
         "method": "POST",
         "description": "Registering a duplicate user returns 400",
+        "skip_auth": true,
         "request_data": {
             "path": {},
             "query": {},
@@ -93,6 +96,7 @@ TEST_CASES = json.loads(r'''[
         "endpoint": "/user/login",
         "method": "POST",
         "description": "Login with valid credentials returns access and refresh tokens",
+        "skip_auth": true,
         "request_data": {
             "path": {},
             "query": {},
@@ -118,6 +122,7 @@ TEST_CASES = json.loads(r'''[
         "endpoint": "/user/login",
         "method": "POST",
         "description": "Login with invalid credentials returns 401",
+        "skip_auth": true,
         "request_data": {
             "path": {},
             "query": {},
@@ -127,42 +132,6 @@ TEST_CASES = json.loads(r'''[
             }
         },
         "expected_status": 401,
-        "setup": null,
-        "cleanup": null
-    },
-    {
-        "name": "refresh_token_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/user/refresh",
-        "method": "POST",
-        "description": "Refresh access token using a valid refresh token",
-        "request_data": {
-            "path": {},
-            "query": {},
-            "body": {},
-            "headers": {
-                "Authorization": "Bearer $fresh_refresh_token"
-            }
-        },
-        "expected_status": 200,
-        "setup": null,
-        "cleanup": null
-    },
-    {
-        "name": "logout_user_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/user/logout",
-        "method": "POST",
-        "description": "Logout the authenticated user",
-        "request_data": {
-            "path": {},
-            "query": {},
-            "body": {},
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
-        },
-        "expected_status": 200,
         "setup": null,
         "cleanup": null
     },
@@ -177,9 +146,6 @@ TEST_CASES = json.loads(r'''[
             "query": {},
             "body": {
                 "name": "Test Store"
-            },
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
             }
         },
         "expected_status": 201,
@@ -195,10 +161,7 @@ TEST_CASES = json.loads(r'''[
         "request_data": {
             "path": {},
             "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
+            "body": null
         },
         "expected_status": 200,
         "setup": null,
@@ -215,10 +178,7 @@ TEST_CASES = json.loads(r'''[
                 "id": "$setup_id"
             },
             "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
+            "body": null
         },
         "expected_status": 200,
         "setup": {
@@ -227,9 +187,6 @@ TEST_CASES = json.loads(r'''[
             "body": {
                 "name": "Store For Get Test"
             },
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            },
             "extract_id_from": "id"
         },
         "cleanup": {
@@ -237,9 +194,6 @@ TEST_CASES = json.loads(r'''[
             "method": "DELETE",
             "path": {
                 "id": "$setup_id"
-            },
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
             }
         }
     },
@@ -254,10 +208,7 @@ TEST_CASES = json.loads(r'''[
                 "id": "$setup_id"
             },
             "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
+            "body": null
         },
         "expected_status": 200,
         "setup": {
@@ -266,11 +217,40 @@ TEST_CASES = json.loads(r'''[
             "body": {
                 "name": "Store For Delete Test"
             },
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            },
             "extract_id_from": "id"
         },
+        "cleanup": null
+    },
+    {
+        "name": "refresh_token_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/user/refresh",
+        "method": "POST",
+        "description": "Refresh access token using a valid refresh token",
+        "request_data": {
+            "path": {},
+            "query": {},
+            "body": {
+                "refresh_token": "$fresh_refresh_token"
+            }
+        },
+        "expected_status": 200,
+        "setup": null,
+        "cleanup": null
+    },
+    {
+        "name": "logout_user_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/user/logout",
+        "method": "POST",
+        "description": "Logout the authenticated user",
+        "request_data": {
+            "path": {},
+            "query": {},
+            "body": {}
+        },
+        "expected_status": 200,
+        "setup": null,
         "cleanup": null
     }
 ]''')
