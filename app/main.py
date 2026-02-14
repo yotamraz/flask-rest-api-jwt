@@ -5,6 +5,7 @@ from fastapi import FastAPI
 
 from .config import get_settings
 from .database import Base, get_engine
+from . import models  # noqa: F401 — ensure models are registered with Base.metadata
 
 logger = logging.getLogger(__name__)
 
