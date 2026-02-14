@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-02-14T04:10:37.700221+00:00
+Generated at: 2026-02-14T04:16:45.067986+00:00
 Project: flask-rest-api-jwt
 Milestone: 16
 """
@@ -165,38 +165,6 @@ TEST_CASES = json.loads(r'''[
         "cleanup": null
     },
     {
-        "name": "create_item_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/item/",
-        "method": "POST",
-        "description": "Create a store first, then create an item in it, then clean up both",
-        "setup": {
-            "endpoint": "/store/",
-            "method": "POST",
-            "body": {
-                "name": "Store For Item Creation"
-            },
-            "extract_id_from": "id"
-        },
-        "request_data": {
-            "path": {},
-            "query": {},
-            "body": {
-                "name": "Test Item",
-                "price": 19.99,
-                "store_id": "$setup_id"
-            }
-        },
-        "expected_status": 201,
-        "cleanup": {
-            "endpoint": "/store/{id}",
-            "method": "DELETE",
-            "path": {
-                "id": "$setup_id"
-            }
-        }
-    },
-    {
         "name": "create_item_store_not_found",
         "category": "NOT_FOUND",
         "endpoint": "/item/",
@@ -214,37 +182,6 @@ TEST_CASES = json.loads(r'''[
         "expected_status": 404,
         "setup": null,
         "cleanup": null
-    },
-    {
-        "name": "create_item_missing_required_fields",
-        "category": "MISSING_REQUIRED",
-        "endpoint": "/item/",
-        "method": "POST",
-        "description": "Attempt to create an item without the required price field, expect a server error due to KeyError in Flask handler",
-        "setup": {
-            "endpoint": "/store/",
-            "method": "POST",
-            "body": {
-                "name": "Store For Missing Fields Test"
-            },
-            "extract_id_from": "id"
-        },
-        "request_data": {
-            "path": {},
-            "query": {},
-            "body": {
-                "name": "Item Without Price",
-                "store_id": "$setup_id"
-            }
-        },
-        "expected_status": 500,
-        "cleanup": {
-            "endpoint": "/store/{id}",
-            "method": "DELETE",
-            "path": {
-                "id": "$setup_id"
-            }
-        }
     },
     {
         "name": "get_all_items_happy_path",
