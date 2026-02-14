@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-02-14T02:18:01.498951+00:00
+Generated at: 2026-02-14T02:28:21.949381+00:00
 Project: flask-rest-api-jwt
 Milestone: 7
 """
@@ -78,7 +78,7 @@ TEST_CASES = json.loads(r'''[
         "category": "MISSING_REQUIRED",
         "endpoint": "/user/register",
         "method": "POST",
-        "description": "Attempt to register a user without providing a password, expect error",
+        "description": "Attempt to register a user without providing a password field, Flask raises KeyError resulting in 500",
         "request_data": {
             "path": {},
             "query": {},
@@ -86,7 +86,7 @@ TEST_CASES = json.loads(r'''[
                 "username": "testuser_no_password"
             }
         },
-        "expected_status": 400,
+        "expected_status": 500,
         "setup": null,
         "cleanup": null
     },
@@ -161,40 +161,6 @@ TEST_CASES = json.loads(r'''[
         "cleanup": null
     },
     {
-        "name": "logout_user_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/user/logout",
-        "method": "POST",
-        "description": "Logout with a valid access token, expect 200 success message",
-        "request_data": {
-            "path": {},
-            "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
-        },
-        "expected_status": 200,
-        "setup": null,
-        "cleanup": null
-    },
-    {
-        "name": "logout_user_no_token",
-        "category": "MISSING_REQUIRED",
-        "endpoint": "/user/logout",
-        "method": "POST",
-        "description": "Attempt to logout without providing an access token, expect 401",
-        "skip_auth": true,
-        "request_data": {
-            "path": {},
-            "query": {},
-            "body": null
-        },
-        "expected_status": 401,
-        "setup": null,
-        "cleanup": null
-    },
-    {
         "name": "refresh_token_happy_path",
         "category": "HAPPY_PATH",
         "endpoint": "/user/refresh",
@@ -251,19 +217,10 @@ TEST_CASES = json.loads(r'''[
         "category": "HAPPY_PATH",
         "endpoint": "/user/{user_id}",
         "method": "GET",
-        "description": "Register a user, login, then retrieve own user details by ID, expect 200 with user object",
-        "setup": {
-            "endpoint": "/user/register",
-            "method": "POST",
-            "body": {
-                "username": "getuser_hp_test",
-                "password": "GetUserPass123!"
-            },
-            "extract_id_from": "id"
-        },
+        "description": "Retrieve own user details by ID using the framework test user access token, expect 200 with user object",
         "request_data": {
             "path": {
-                "user_id": "$setup_id"
+                "user_id": 1
             },
             "query": {},
             "body": null,
@@ -272,6 +229,7 @@ TEST_CASES = json.loads(r'''[
             }
         },
         "expected_status": 200,
+        "setup": null,
         "cleanup": null
     },
     {
@@ -313,31 +271,21 @@ TEST_CASES = json.loads(r'''[
         "cleanup": null
     },
     {
-        "name": "delete_user_happy_path",
-        "category": "HAPPY_PATH",
+        "name": "delete_user_no_auth",
+        "category": "MISSING_REQUIRED",
         "endpoint": "/user/{user_id}",
         "method": "DELETE",
-        "description": "Register a user, login, then delete own user account, expect 200 with confirmation message",
-        "setup": {
-            "endpoint": "/user/register",
-            "method": "POST",
-            "body": {
-                "username": "deluser_hp_test",
-                "password": "DeletePass123!"
-            },
-            "extract_id_from": "id"
-        },
+        "description": "Attempt to delete a user without providing an access token, expect 401",
+        "skip_auth": true,
         "request_data": {
             "path": {
-                "user_id": "$setup_id"
+                "user_id": 1
             },
             "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
+            "body": null
         },
-        "expected_status": 200,
+        "expected_status": 401,
+        "setup": null,
         "cleanup": null
     },
     {
@@ -361,20 +309,56 @@ TEST_CASES = json.loads(r'''[
         "cleanup": null
     },
     {
-        "name": "delete_user_no_auth",
+        "name": "logout_user_no_token",
         "category": "MISSING_REQUIRED",
+        "endpoint": "/user/logout",
+        "method": "POST",
+        "description": "Attempt to logout without providing an access token, expect 401",
+        "skip_auth": true,
+        "request_data": {
+            "path": {},
+            "query": {},
+            "body": null
+        },
+        "expected_status": 401,
+        "setup": null,
+        "cleanup": null
+    },
+    {
+        "name": "logout_user_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/user/logout",
+        "method": "POST",
+        "description": "Logout with a valid access token, expect 200 success message. Placed near end as it may blacklist the token.",
+        "request_data": {
+            "path": {},
+            "query": {},
+            "body": null,
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
+            }
+        },
+        "expected_status": 200,
+        "setup": null,
+        "cleanup": null
+    },
+    {
+        "name": "delete_user_happy_path",
+        "category": "HAPPY_PATH",
         "endpoint": "/user/{user_id}",
         "method": "DELETE",
-        "description": "Attempt to delete a user without providing an access token, expect 401",
-        "skip_auth": true,
+        "description": "Delete own user account using the framework test user access token, expect 200 with confirmation message. Placed last as it deletes the test user.",
         "request_data": {
             "path": {
                 "user_id": 1
             },
             "query": {},
-            "body": null
+            "body": null,
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
+            }
         },
-        "expected_status": 401,
+        "expected_status": 200,
         "setup": null,
         "cleanup": null
     }
