@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-02-14T04:02:56.569955+00:00
+Generated at: 2026-02-14T04:05:35.029416+00:00
 Project: flask-rest-api-jwt
 Milestone: 14
 """
@@ -56,7 +56,7 @@ TEST_CASES = json.loads(r'''[
             "path": {},
             "query": {},
             "body": {
-                "username": "testuser_register_hp",
+                "username": "user_a1b2c3d4e5f6",
                 "password": "password123"
             }
         },
@@ -75,7 +75,7 @@ TEST_CASES = json.loads(r'''[
             "path": {},
             "query": {},
             "body": {
-                "username": "testuser_dup_check",
+                "username": "user_dup_x9y8z7",
                 "password": "password123"
             }
         },
@@ -84,9 +84,10 @@ TEST_CASES = json.loads(r'''[
             "endpoint": "/user/register",
             "method": "POST",
             "body": {
-                "username": "testuser_dup_check",
+                "username": "user_dup_x9y8z7",
                 "password": "password123"
-            }
+            },
+            "required": false
         },
         "cleanup": null
     },
@@ -101,7 +102,7 @@ TEST_CASES = json.loads(r'''[
             "path": {},
             "query": {},
             "body": {
-                "username": "testuser_login_hp",
+                "username": "user_login_m3n4o5",
                 "password": "password123"
             }
         },
@@ -110,9 +111,10 @@ TEST_CASES = json.loads(r'''[
             "endpoint": "/user/register",
             "method": "POST",
             "body": {
-                "username": "testuser_login_hp",
+                "username": "user_login_m3n4o5",
                 "password": "password123"
-            }
+            },
+            "required": false
         },
         "cleanup": null
     },
@@ -127,7 +129,7 @@ TEST_CASES = json.loads(r'''[
             "path": {},
             "query": {},
             "body": {
-                "username": "nonexistentuser99",
+                "username": "nonexistentuser99z",
                 "password": "wrongpassword"
             }
         },
