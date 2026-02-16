@@ -8,3 +8,4 @@ bcrypt<5
 pydantic-settings~=2.0
 pytest
 httpx
+requests
