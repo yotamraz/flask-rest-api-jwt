@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from .config import get_settings
 from .database import Base, get_engine
+from .routers import health
 
 
 def create_app() -> FastAPI:
@@ -16,6 +17,8 @@ def create_app() -> FastAPI:
     def on_startup() -> None:
         engine = get_engine()
         Base.metadata.create_all(bind=engine)
+
+    app.include_router(health.router)
 
     return app
 
