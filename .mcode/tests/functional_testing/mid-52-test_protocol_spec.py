@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-02-16T15:24:12.335737+00:00
+Generated at: 2026-02-16T15:32:23.011376+00:00
 Project: flask-rest-api-jwt
 Milestone: 52
 """
@@ -235,7 +235,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "category": "HAPPY_PATH",
         "endpoint": "/user/{id}",
         "method": "GET",
-        "description": "GET the authenticated user by their ID. Expect 200 with user data (id and username). Uses the auth user created during authentication setup.",
+        "description": "GET the authenticated user by their ID. Expect 200 with user data (id and username). Uses the auth user (ID 1) created during bootstrap.",
         "request_data": {
             "path": {
                 "id": 1
@@ -301,7 +301,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "category": "HAPPY_PATH",
         "endpoint": "/user/{id}",
         "method": "DELETE",
-        "description": "DELETE the authenticated user by their ID. Expect 200 with 'Deleted' message. Uses the auth user created during authentication setup.",
+        "description": "DELETE the authenticated user (ID 1) by their ID. Expect 200 with 'Deleted' message.",
         "request_data": {
             "path": {
                 "id": 1
