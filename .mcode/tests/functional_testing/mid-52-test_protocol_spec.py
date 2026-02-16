@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-02-16T16:04:12.720092+00:00
+Generated at: 2026-02-16T16:16:01.177734+00:00
 Project: flask-rest-api-jwt
 Milestone: 52
 """
@@ -241,9 +241,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "id": 1
             },
             "query": {},
-            "headers": {
-                "Authorization": "Bearer ${AUTH_ACCESS_TOKEN}"
-            },
             "body": null
         },
         "expected_status": 200,
@@ -261,9 +258,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "id": 999999
             },
             "query": {},
-            "headers": {
-                "Authorization": "Bearer ${AUTH_ACCESS_TOKEN}"
-            },
             "body": null
         },
         "expected_status": 404,
@@ -281,9 +275,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "id": 999999
             },
             "query": {},
-            "headers": {
-                "Authorization": "Bearer ${AUTH_ACCESS_TOKEN}"
-            },
             "body": null
         },
         "expected_status": 404,
@@ -299,9 +290,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "request_data": {
             "path": {},
             "query": {},
-            "headers": {
-                "Authorization": "Bearer ${AUTH_ACCESS_TOKEN}"
-            },
             "body": null
         },
         "expected_status": 422,
@@ -319,9 +307,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "id": 1
             },
             "query": {},
-            "headers": {
-                "Authorization": "Bearer ${AUTH_ACCESS_TOKEN}"
-            },
             "body": null
         },
         "expected_status": 200,
@@ -337,9 +322,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "request_data": {
             "path": {},
             "query": {},
-            "headers": {
-                "Authorization": "Bearer ${AUTH_ACCESS_TOKEN}"
-            },
             "body": null
         },
         "expected_status": 200,
