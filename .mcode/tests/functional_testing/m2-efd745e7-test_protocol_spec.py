@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-03-02T16:49:24.395199+00:00
+Generated at: 2026-03-02T17:03:29.624750+00:00
 Project: flask-rest-api-jwt
 Milestone: 2
 """
@@ -63,7 +63,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "name": "Test Store Alpha"
             },
             "headers": {
-                "Authorization": "Bearer $fresh_access_token"
+                "Authorization": "Bearer ${ACCESS_TOKEN}"
             }
         },
         "expected_status": 201,
@@ -100,7 +100,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "name": "Retrievable Store"
             },
             "headers": {
-                "Authorization": "Bearer $fresh_access_token"
+                "Authorization": "Bearer ${ACCESS_TOKEN}"
             },
             "extract_id_from": "id"
         },
@@ -111,7 +111,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "query": {},
             "body": null,
             "headers": {
-                "Authorization": "Bearer $fresh_access_token"
+                "Authorization": "Bearer ${ACCESS_TOKEN}"
             }
         },
         "expected_status": 200,
@@ -122,7 +122,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "id": "$setup_id"
             },
             "headers": {
-                "Authorization": "Bearer $fresh_access_token"
+                "Authorization": "Bearer ${ACCESS_TOKEN}"
             }
         }
     },
@@ -139,7 +139,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "query": {},
             "body": null,
             "headers": {
-                "Authorization": "Bearer $fresh_access_token"
+                "Authorization": "Bearer ${ACCESS_TOKEN}"
             }
         },
         "expected_status": 404,
@@ -157,7 +157,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "query": {},
             "body": null,
             "headers": {
-                "Authorization": "Bearer $fresh_access_token"
+                "Authorization": "Bearer ${ACCESS_TOKEN}"
             }
         },
         "expected_status": 200,
@@ -192,7 +192,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "name": "Store To Delete"
             },
             "headers": {
-                "Authorization": "Bearer $fresh_access_token"
+                "Authorization": "Bearer ${ACCESS_TOKEN}"
             },
             "extract_id_from": "id"
         },
@@ -203,7 +203,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "query": {},
             "body": null,
             "headers": {
-                "Authorization": "Bearer $fresh_access_token"
+                "Authorization": "Bearer ${ACCESS_TOKEN}"
             }
         },
         "expected_status": 200,
@@ -222,7 +222,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "query": {},
             "body": null,
             "headers": {
-                "Authorization": "Bearer $fresh_access_token"
+                "Authorization": "Bearer ${ACCESS_TOKEN}"
             }
         },
         "expected_status": 404,
@@ -242,7 +242,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "name": "Store For Item Creation"
             },
             "headers": {
-                "Authorization": "Bearer $fresh_access_token"
+                "Authorization": "Bearer ${ACCESS_TOKEN}"
             },
             "extract_id_from": "id"
         },
@@ -255,7 +255,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "store_id": "$setup_id"
             },
             "headers": {
-                "Authorization": "Bearer $fresh_access_token"
+                "Authorization": "Bearer ${ACCESS_TOKEN}"
             }
         },
         "expected_status": 201,
@@ -266,7 +266,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "id": "$setup_id"
             },
             "headers": {
-                "Authorization": "Bearer $fresh_access_token"
+                "Authorization": "Bearer ${ACCESS_TOKEN}"
             }
         }
     },
@@ -285,7 +285,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "store_id": 999999
             },
             "headers": {
-                "Authorization": "Bearer $fresh_access_token"
+                "Authorization": "Bearer ${ACCESS_TOKEN}"
             }
         },
         "expected_status": 404,
@@ -322,7 +322,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "query": {},
             "body": null,
             "headers": {
-                "Authorization": "Bearer $fresh_access_token"
+                "Authorization": "Bearer ${ACCESS_TOKEN}"
             }
         },
         "expected_status": 200,
@@ -357,7 +357,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "query": {},
             "body": null,
             "headers": {
-                "Authorization": "Bearer $fresh_access_token"
+                "Authorization": "Bearer ${ACCESS_TOKEN}"
             }
         },
         "expected_status": 404,
@@ -397,7 +397,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "price": 0.01
             },
             "headers": {
-                "Authorization": "Bearer $fresh_access_token"
+                "Authorization": "Bearer ${ACCESS_TOKEN}"
             }
         },
         "expected_status": 404,
@@ -437,7 +437,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "query": {},
             "body": null,
             "headers": {
-                "Authorization": "Bearer $fresh_access_token"
+                "Authorization": "Bearer ${ACCESS_TOKEN}"
             }
         },
         "expected_status": 404,
