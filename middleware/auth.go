@@ -116,7 +116,7 @@ func (m *JWTManager) requireToken(expectedType string) gin.HandlerFunc {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "Missing authorization header",
+				"msg": "Missing Authorization Header",
 			})
 			return
 		}
