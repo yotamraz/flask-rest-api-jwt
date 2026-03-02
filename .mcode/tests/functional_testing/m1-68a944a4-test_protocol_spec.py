@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-03-02T16:37:41.585483+00:00
+Generated at: 2026-03-02T16:43:37.962930+00:00
 Project: flask-rest-api-jwt
 Milestone: 1
 """
@@ -133,6 +133,14 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             }
         },
         "expected_status": 200,
+        "store": {
+            "refresh_token": "refresh_token"
+        },
+        "store_auth": {
+            "headers": {
+                "Authorization": "Bearer {access_token}"
+            }
+        },
         "cleanup": null
     },
     {
@@ -180,6 +188,59 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "cleanup": null
     },
     {
+        "name": "refresh_token_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/user/refresh",
+        "method": "POST",
+        "description": "Refresh with a valid refresh token returns 200 with a new access_token",
+        "skip_auth": true,
+        "request_data": {
+            "path": {},
+            "query": {},
+            "body": null,
+            "headers": {
+                "Authorization": "Bearer $stored.refresh_token"
+            }
+        },
+        "expected_status": 200,
+        "setup": null,
+        "cleanup": null
+    },
+    {
+        "name": "get_user_not_found",
+        "category": "NOT_FOUND",
+        "endpoint": "/user/{id}",
+        "method": "GET",
+        "description": "Get a non-existent user with valid auth returns 404",
+        "request_data": {
+            "path": {
+                "id": 99999
+            },
+            "query": {},
+            "body": null
+        },
+        "expected_status": 404,
+        "setup": null,
+        "cleanup": null
+    },
+    {
+        "name": "delete_user_not_found",
+        "category": "NOT_FOUND",
+        "endpoint": "/user/{id}",
+        "method": "DELETE",
+        "description": "Delete a non-existent user with valid auth returns 404",
+        "request_data": {
+            "path": {
+                "id": 99999
+            },
+            "query": {},
+            "body": null
+        },
+        "expected_status": 404,
+        "setup": null,
+        "cleanup": null
+    },
+    {
         "name": "logout_happy_path",
         "category": "HAPPY_PATH",
         "endpoint": "/user/logout",
@@ -188,10 +249,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "request_data": {
             "path": {},
             "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
+            "body": null
         },
         "expected_status": 200,
         "setup": null,
@@ -203,6 +261,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "endpoint": "/user/logout",
         "method": "POST",
         "description": "Logout without an Authorization header returns 401",
+        "skip_auth": true,
         "request_data": {
             "path": {},
             "query": {},
@@ -213,29 +272,12 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "cleanup": null
     },
     {
-        "name": "refresh_token_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/user/refresh",
-        "method": "POST",
-        "description": "Refresh with a valid refresh token returns 200 with a new access_token",
-        "request_data": {
-            "path": {},
-            "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $fresh_refresh_token"
-            }
-        },
-        "expected_status": 200,
-        "setup": null,
-        "cleanup": null
-    },
-    {
         "name": "refresh_no_auth",
         "category": "AUTH",
         "endpoint": "/user/refresh",
         "method": "POST",
         "description": "Refresh without an Authorization header returns 401",
+        "skip_auth": true,
         "request_data": {
             "path": {},
             "query": {},
@@ -251,6 +293,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "endpoint": "/user/{id}",
         "method": "GET",
         "description": "Get user by ID without an Authorization header returns 401",
+        "skip_auth": true,
         "request_data": {
             "path": {
                 "id": 1
@@ -259,26 +302,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "body": null
         },
         "expected_status": 401,
-        "setup": null,
-        "cleanup": null
-    },
-    {
-        "name": "get_user_not_found",
-        "category": "NOT_FOUND",
-        "endpoint": "/user/{id}",
-        "method": "GET",
-        "description": "Get a non-existent user with valid auth returns 404",
-        "request_data": {
-            "path": {
-                "id": 99999
-            },
-            "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
-        },
-        "expected_status": 404,
         "setup": null,
         "cleanup": null
     },
@@ -288,6 +311,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "endpoint": "/user/{id}",
         "method": "DELETE",
         "description": "Delete user by ID without an Authorization header returns 401",
+        "skip_auth": true,
         "request_data": {
             "path": {
                 "id": 1
@@ -296,26 +320,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "body": null
         },
         "expected_status": 401,
-        "setup": null,
-        "cleanup": null
-    },
-    {
-        "name": "delete_user_not_found",
-        "category": "NOT_FOUND",
-        "endpoint": "/user/{id}",
-        "method": "DELETE",
-        "description": "Delete a non-existent user with valid auth returns 404",
-        "request_data": {
-            "path": {
-                "id": 99999
-            },
-            "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
-        },
-        "expected_status": 404,
         "setup": null,
         "cleanup": null
     }
