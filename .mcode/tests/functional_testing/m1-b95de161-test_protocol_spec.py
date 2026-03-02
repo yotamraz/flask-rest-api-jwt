@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-03-02T16:59:50.416984+00:00
+Generated at: 2026-03-02T17:08:55.918057+00:00
 Project: flask-rest-api-jwt
 Milestone: 1
 """
@@ -76,7 +76,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "query": {},
             "body": {
                 "username": "newuser_reg",
-                "password": "${TEST_USER_PASSWORD}"
+                "password": "TestPassword123"
             }
         },
         "expected_status": 201,
@@ -94,7 +94,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "method": "POST",
             "body": {
                 "username": "dupuser",
-                "password": "${TEST_USER_PASSWORD}"
+                "password": "TestPassword123"
             },
             "extract_id_from": "id"
         },
@@ -103,7 +103,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "query": {},
             "body": {
                 "username": "dupuser",
-                "password": "${TEST_USER_PASSWORD_ALT}"
+                "password": "AnotherPass456"
             }
         },
         "expected_status": 400,
@@ -120,7 +120,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "method": "POST",
             "body": {
                 "username": "loginuser",
-                "password": "${TEST_USER_PASSWORD}"
+                "password": "TestPassword123"
             },
             "extract_id_from": "id"
         },
@@ -129,7 +129,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "query": {},
             "body": {
                 "username": "loginuser",
-                "password": "${TEST_USER_PASSWORD}"
+                "password": "TestPassword123"
             }
         },
         "expected_status": 200,
@@ -154,7 +154,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "method": "POST",
             "body": {
                 "username": "loginuser2",
-                "password": "${TEST_USER_PASSWORD}"
+                "password": "TestPassword123"
             },
             "extract_id_from": "id"
         },
@@ -163,7 +163,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "query": {},
             "body": {
                 "username": "loginuser2",
-                "password": "${WRONG_PASSWORD}"
+                "password": "WrongPassword999"
             }
         },
         "expected_status": 401,
@@ -180,7 +180,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "query": {},
             "body": {
                 "username": "nosuchuser999",
-                "password": "${TEST_USER_PASSWORD}"
+                "password": "TestPassword123"
             }
         },
         "expected_status": 401,
@@ -328,7 +328,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
 
 # Base URL for API requests (from app discovery, includes host:port)
 BASE_URL = os.path.expandvars("http://localhost:5000")
-HEALTH_CHECK_ENDPOINT = os.path.expandvars("/health")
+HEALTH_CHECK_ENDPOINT = os.path.expandvars("/health/")
 REQUEST_TIMEOUT = 30
 HEALTH_CHECK_URL = f"{BASE_URL.rstrip('/')}/{HEALTH_CHECK_ENDPOINT.lstrip('/')}"
 # Per-endpoint routing table for microservices DST
