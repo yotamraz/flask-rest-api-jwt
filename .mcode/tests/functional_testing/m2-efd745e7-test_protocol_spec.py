@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-03-02T16:27:43.544153+00:00
+Generated at: 2026-03-02T16:35:22.670500+00:00
 Project: flask-rest-api-jwt
 Milestone: 2
 """
@@ -68,16 +68,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         },
         "expected_status": 201,
         "setup": null,
-        "cleanup": {
-            "endpoint": "/store/{id}",
-            "method": "DELETE",
-            "path": {
-                "id": "$response_id"
-            },
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
-        }
+        "cleanup": null
     },
     {
         "name": "create_store_no_auth",
@@ -475,7 +466,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
 
 # Base URL for API requests (from app discovery, includes host:port)
 BASE_URL = os.path.expandvars("http://localhost:5000")
-HEALTH_CHECK_ENDPOINT = os.path.expandvars("/health")
+HEALTH_CHECK_ENDPOINT = os.path.expandvars("/health/")
 REQUEST_TIMEOUT = 30
 HEALTH_CHECK_URL = f"{BASE_URL.rstrip('/')}/{HEALTH_CHECK_ENDPOINT.lstrip('/')}"
 # Per-endpoint routing table for microservices DST
