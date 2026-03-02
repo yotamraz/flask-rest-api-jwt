@@ -85,6 +85,12 @@ replay_pid*
 *.test
 *.out
 *.coverprofile
+flask-rest-api-jwt
+
+# ----- SQLite dev/test databases -----
+*.db
+*.sqlite
+data-dev.sqlite
 
 # ----- C# / .NET -----
 [Bb]in/
