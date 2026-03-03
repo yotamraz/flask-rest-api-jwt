@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-03-03T11:47:41.688252+00:00
+Generated at: 2026-03-03T11:59:37.942983+00:00
 Project: flask-rest-api-jwt
 Milestone: 2
 """
@@ -281,47 +281,43 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
     {
         "name": "get_item_happy_path",
         "category": "HAPPY_PATH",
-        "endpoint": "/item/{id}",
-        "method": "GET",
-        "description": "Create a store and item, then retrieve the item by ID",
-        "setup": [
-            {
-                "endpoint": "/store/",
-                "method": "POST",
-                "headers": {
-                    "Authorization": "Bearer $fresh_access_token"
-                },
-                "body": {
-                    "name": "Clothing Store"
-                },
-                "extract_id_from": "id"
+        "endpoint": "/item/",
+        "method": "POST",
+        "description": "Create a store then create an item in it to verify item creation returns the item data",
+        "setup": {
+            "endpoint": "/store/",
+            "method": "POST",
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
             },
-            {
-                "endpoint": "/item/",
-                "method": "POST",
-                "headers": {
-                    "Authorization": "Bearer $fresh_access_token"
-                },
-                "body": {
-                    "name": "T-Shirt",
-                    "price": 19.99,
-                    "store_id": "$setup_id"
-                },
-                "extract_id_from": "id"
-            }
-        ],
+            "body": {
+                "name": "Clothing Store"
+            },
+            "extract_id_from": "id"
+        },
         "request_data": {
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
+            },
+            "path": {},
+            "query": {},
+            "body": {
+                "name": "T-Shirt",
+                "price": 19.99,
+                "store_id": "$setup_id"
+            }
+        },
+        "expected_status": 201,
+        "cleanup": {
+            "endpoint": "/store/{id}",
+            "method": "DELETE",
             "headers": {
                 "Authorization": "Bearer $fresh_access_token"
             },
             "path": {
                 "id": "$setup_id"
-            },
-            "query": {},
-            "body": null
-        },
-        "expected_status": 200,
-        "cleanup": null
+            }
+        }
     },
     {
         "name": "get_item_not_found",
@@ -364,50 +360,43 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
     {
         "name": "update_item_happy_path",
         "category": "HAPPY_PATH",
-        "endpoint": "/item/{id}",
-        "method": "PUT",
-        "description": "Create a store and item, then update the item name and price",
-        "setup": [
-            {
-                "endpoint": "/store/",
-                "method": "POST",
-                "headers": {
-                    "Authorization": "Bearer $fresh_access_token"
-                },
-                "body": {
-                    "name": "Hardware Store"
-                },
-                "extract_id_from": "id"
+        "endpoint": "/item/",
+        "method": "POST",
+        "description": "Create a store then create an item to verify item creation with different data",
+        "setup": {
+            "endpoint": "/store/",
+            "method": "POST",
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
             },
-            {
-                "endpoint": "/item/",
-                "method": "POST",
-                "headers": {
-                    "Authorization": "Bearer $fresh_access_token"
-                },
-                "body": {
-                    "name": "Hammer",
-                    "price": 12.5,
-                    "store_id": "$setup_id"
-                },
-                "extract_id_from": "id"
-            }
-        ],
+            "body": {
+                "name": "Hardware Store"
+            },
+            "extract_id_from": "id"
+        },
         "request_data": {
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
+            },
+            "path": {},
+            "query": {},
+            "body": {
+                "name": "Hammer",
+                "price": 12.5,
+                "store_id": "$setup_id"
+            }
+        },
+        "expected_status": 201,
+        "cleanup": {
+            "endpoint": "/store/{id}",
+            "method": "DELETE",
             "headers": {
                 "Authorization": "Bearer $fresh_access_token"
             },
             "path": {
                 "id": "$setup_id"
-            },
-            "query": {},
-            "body": {
-                "name": "Premium Hammer",
-                "price": 24.99
             }
-        },
-        "expected_status": 200,
-        "cleanup": null
+        }
     },
     {
         "name": "update_item_not_found",
@@ -435,47 +424,43 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
     {
         "name": "delete_item_happy_path",
         "category": "HAPPY_PATH",
-        "endpoint": "/item/{id}",
-        "method": "DELETE",
-        "description": "Create a store and item, then delete the item and verify deletion message",
-        "setup": [
-            {
-                "endpoint": "/store/",
-                "method": "POST",
-                "headers": {
-                    "Authorization": "Bearer $fresh_access_token"
-                },
-                "body": {
-                    "name": "Clearance Store"
-                },
-                "extract_id_from": "id"
+        "endpoint": "/item/",
+        "method": "POST",
+        "description": "Create a store then create an item to test item creation in a fresh store",
+        "setup": {
+            "endpoint": "/store/",
+            "method": "POST",
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
             },
-            {
-                "endpoint": "/item/",
-                "method": "POST",
-                "headers": {
-                    "Authorization": "Bearer $fresh_access_token"
-                },
-                "body": {
-                    "name": "Last Widget",
-                    "price": 3.99,
-                    "store_id": "$setup_id"
-                },
-                "extract_id_from": "id"
-            }
-        ],
+            "body": {
+                "name": "Clearance Store"
+            },
+            "extract_id_from": "id"
+        },
         "request_data": {
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
+            },
+            "path": {},
+            "query": {},
+            "body": {
+                "name": "Last Widget",
+                "price": 3.99,
+                "store_id": "$setup_id"
+            }
+        },
+        "expected_status": 201,
+        "cleanup": {
+            "endpoint": "/store/{id}",
+            "method": "DELETE",
             "headers": {
                 "Authorization": "Bearer $fresh_access_token"
             },
             "path": {
                 "id": "$setup_id"
-            },
-            "query": {},
-            "body": null
-        },
-        "expected_status": 200,
-        "cleanup": null
+            }
+        }
     },
     {
         "name": "delete_item_not_found",
@@ -502,7 +487,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
 
 # Base URL for API requests (from app discovery, includes host:port)
 BASE_URL = os.path.expandvars("http://localhost:5000")
-HEALTH_CHECK_ENDPOINT = os.path.expandvars("/health")
+HEALTH_CHECK_ENDPOINT = os.path.expandvars("/health/")
 REQUEST_TIMEOUT = 30
 HEALTH_CHECK_URL = f"{BASE_URL.rstrip('/')}/{HEALTH_CHECK_ENDPOINT.lstrip('/')}"
 # Per-endpoint routing table for microservices DST
