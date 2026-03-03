@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-03-03T12:05:11.501084+00:00
+Generated at: 2026-03-03T12:06:25.741416+00:00
 Project: flask-rest-api-jwt
 Milestone: 1
 """
@@ -280,14 +280,14 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "category": "AUTH",
         "endpoint": "/user/refresh",
         "method": "POST",
-        "description": "Attempt token refresh after token has been revoked, expect 401",
+        "description": "Attempt token refresh with an access token instead of refresh token, expect 422 validation error",
         "setup": null,
         "request_data": {
             "path": {},
             "query": {},
             "body": null
         },
-        "expected_status": 401,
+        "expected_status": 422,
         "cleanup": null
     }
 ]''')
