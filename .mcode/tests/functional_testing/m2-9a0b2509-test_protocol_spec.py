@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-03-03T13:54:46.873594+00:00
+Generated at: 2026-03-03T14:07:18.002122+00:00
 Project: flask-rest-api-jwt
 Milestone: 2
 """
@@ -335,38 +335,23 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "category": "HAPPY_PATH",
         "endpoint": "/item/{id}",
         "method": "GET",
-        "description": "Create a store and an item, then retrieve the item by ID",
-        "setup": [
-            {
-                "endpoint": "/store/",
-                "method": "POST",
-                "body": {
-                    "name": "Store For Get Item"
-                },
-                "headers": {
-                    "Authorization": "Bearer $fresh_access_token"
-                },
-                "extract_id_from": "id",
-                "extract_id_as": "store_id"
+        "description": "Create an item in the bootstrapped store, then retrieve the item by ID",
+        "setup": {
+            "endpoint": "/item/",
+            "method": "POST",
+            "body": {
+                "name": "Widget To Get",
+                "price": 15.5,
+                "store_id": 1
             },
-            {
-                "endpoint": "/item/",
-                "method": "POST",
-                "body": {
-                    "name": "Widget To Get",
-                    "price": 15.5,
-                    "store_id": "$store_id"
-                },
-                "headers": {
-                    "Authorization": "Bearer $fresh_access_token"
-                },
-                "extract_id_from": "id",
-                "extract_id_as": "item_id"
-            }
-        ],
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
+            },
+            "extract_id_from": "id"
+        },
         "request_data": {
             "path": {
-                "id": "$item_id"
+                "id": "$setup_id"
             },
             "query": {},
             "body": null,
@@ -376,10 +361,10 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         },
         "expected_status": 200,
         "cleanup": {
-            "endpoint": "/store/{id}",
+            "endpoint": "/item/{id}",
             "method": "DELETE",
             "path": {
-                "id": "$store_id"
+                "id": "$setup_id"
             },
             "headers": {
                 "Authorization": "Bearer $fresh_access_token"
@@ -411,35 +396,20 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "category": "HAPPY_PATH",
         "endpoint": "/item/s",
         "method": "GET",
-        "description": "Create a store with an item, then list all items for the user",
-        "setup": [
-            {
-                "endpoint": "/store/",
-                "method": "POST",
-                "body": {
-                    "name": "Store For List Items"
-                },
-                "headers": {
-                    "Authorization": "Bearer $fresh_access_token"
-                },
-                "extract_id_from": "id",
-                "extract_id_as": "store_id"
+        "description": "Create an item in the bootstrapped store, then list all items for the user",
+        "setup": {
+            "endpoint": "/item/",
+            "method": "POST",
+            "body": {
+                "name": "Listed Item",
+                "price": 12.0,
+                "store_id": 1
             },
-            {
-                "endpoint": "/item/",
-                "method": "POST",
-                "body": {
-                    "name": "Listed Item",
-                    "price": 12.0,
-                    "store_id": "$store_id"
-                },
-                "headers": {
-                    "Authorization": "Bearer $fresh_access_token"
-                },
-                "extract_id_from": "id",
-                "extract_id_as": "item_id"
-            }
-        ],
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
+            },
+            "extract_id_from": "id"
+        },
         "request_data": {
             "path": {},
             "query": {},
@@ -450,10 +420,10 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         },
         "expected_status": 200,
         "cleanup": {
-            "endpoint": "/store/{id}",
+            "endpoint": "/item/{id}",
             "method": "DELETE",
             "path": {
-                "id": "$store_id"
+                "id": "$setup_id"
             },
             "headers": {
                 "Authorization": "Bearer $fresh_access_token"
@@ -480,38 +450,23 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "category": "HAPPY_PATH",
         "endpoint": "/item/{id}",
         "method": "PUT",
-        "description": "Create a store and item, then update the item name and price",
-        "setup": [
-            {
-                "endpoint": "/store/",
-                "method": "POST",
-                "body": {
-                    "name": "Store For Update Item"
-                },
-                "headers": {
-                    "Authorization": "Bearer $fresh_access_token"
-                },
-                "extract_id_from": "id",
-                "extract_id_as": "store_id"
+        "description": "Create an item, then update the item name and price",
+        "setup": {
+            "endpoint": "/item/",
+            "method": "POST",
+            "body": {
+                "name": "Original Widget",
+                "price": 19.99,
+                "store_id": 1
             },
-            {
-                "endpoint": "/item/",
-                "method": "POST",
-                "body": {
-                    "name": "Original Widget",
-                    "price": 19.99,
-                    "store_id": "$store_id"
-                },
-                "headers": {
-                    "Authorization": "Bearer $fresh_access_token"
-                },
-                "extract_id_from": "id",
-                "extract_id_as": "item_id"
-            }
-        ],
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
+            },
+            "extract_id_from": "id"
+        },
         "request_data": {
             "path": {
-                "id": "$item_id"
+                "id": "$setup_id"
             },
             "query": {},
             "body": {
@@ -524,10 +479,10 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         },
         "expected_status": 200,
         "cleanup": {
-            "endpoint": "/store/{id}",
+            "endpoint": "/item/{id}",
             "method": "DELETE",
             "path": {
-                "id": "$store_id"
+                "id": "$setup_id"
             },
             "headers": {
                 "Authorization": "Bearer $fresh_access_token"
@@ -562,38 +517,23 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "category": "HAPPY_PATH",
         "endpoint": "/item/{id}",
         "method": "DELETE",
-        "description": "Create a store and item, then delete the item, verify 200 with message Deleted",
-        "setup": [
-            {
-                "endpoint": "/store/",
-                "method": "POST",
-                "body": {
-                    "name": "Store For Delete Item"
-                },
-                "headers": {
-                    "Authorization": "Bearer $fresh_access_token"
-                },
-                "extract_id_from": "id",
-                "extract_id_as": "store_id"
+        "description": "Create an item, then delete it, verify 200 with message Deleted",
+        "setup": {
+            "endpoint": "/item/",
+            "method": "POST",
+            "body": {
+                "name": "Item To Delete",
+                "price": 7.5,
+                "store_id": 1
             },
-            {
-                "endpoint": "/item/",
-                "method": "POST",
-                "body": {
-                    "name": "Item To Delete",
-                    "price": 7.5,
-                    "store_id": "$store_id"
-                },
-                "headers": {
-                    "Authorization": "Bearer $fresh_access_token"
-                },
-                "extract_id_from": "id",
-                "extract_id_as": "item_id"
-            }
-        ],
+            "headers": {
+                "Authorization": "Bearer $fresh_access_token"
+            },
+            "extract_id_from": "id"
+        },
         "request_data": {
             "path": {
-                "id": "$item_id"
+                "id": "$setup_id"
             },
             "query": {},
             "body": null,
@@ -602,16 +542,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             }
         },
         "expected_status": 200,
-        "cleanup": {
-            "endpoint": "/store/{id}",
-            "method": "DELETE",
-            "path": {
-                "id": "$store_id"
-            },
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
-        }
+        "cleanup": null
     },
     {
         "name": "delete_item_not_found",
@@ -638,7 +569,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
 
 # Base URL for API requests (from app discovery, includes host:port)
 BASE_URL = os.path.expandvars("http://localhost:5000")
-HEALTH_CHECK_ENDPOINT = os.path.expandvars("/health")
+HEALTH_CHECK_ENDPOINT = os.path.expandvars("/health/")
 REQUEST_TIMEOUT = 30
 HEALTH_CHECK_URL = f"{BASE_URL.rstrip('/')}/{HEALTH_CHECK_ENDPOINT.lstrip('/')}"
 # Per-endpoint routing table for microservices DST
