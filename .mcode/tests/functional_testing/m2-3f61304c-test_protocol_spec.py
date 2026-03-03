@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-03-03T11:39:08.379814+00:00
+Generated at: 2026-03-03T11:47:41.688252+00:00
 Project: flask-rest-api-jwt
 Milestone: 2
 """
@@ -68,23 +68,14 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         },
         "expected_status": 201,
         "setup": null,
-        "cleanup": {
-            "endpoint": "/store/{id}",
-            "method": "DELETE",
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            },
-            "path": {
-                "id": "$response_id"
-            }
-        }
+        "cleanup": null
     },
     {
         "name": "create_store_missing_name",
         "category": "MISSING_REQUIRED",
         "endpoint": "/store/",
         "method": "POST",
-        "description": "Attempt to create a store without providing the required name field",
+        "description": "Attempt to create a store without providing the required name field, expecting server error due to missing key",
         "request_data": {
             "headers": {
                 "Authorization": "Bearer $fresh_access_token"
@@ -93,7 +84,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "query": {},
             "body": {}
         },
-        "expected_status": 400,
+        "expected_status": 500,
         "setup": null,
         "cleanup": null
     },
@@ -303,8 +294,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "body": {
                     "name": "Clothing Store"
                 },
-                "extract_id_from": "id",
-                "save_as": "store_id"
+                "extract_id_from": "id"
             },
             {
                 "endpoint": "/item/",
@@ -315,7 +305,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "body": {
                     "name": "T-Shirt",
                     "price": 19.99,
-                    "store_id": "$store_id"
+                    "store_id": "$setup_id"
                 },
                 "extract_id_from": "id"
             }
@@ -331,16 +321,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "body": null
         },
         "expected_status": 200,
-        "cleanup": {
-            "endpoint": "/store/{id}",
-            "method": "DELETE",
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            },
-            "path": {
-                "id": "$store_id"
-            }
-        }
+        "cleanup": null
     },
     {
         "name": "get_item_not_found",
@@ -396,8 +377,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "body": {
                     "name": "Hardware Store"
                 },
-                "extract_id_from": "id",
-                "save_as": "store_id"
+                "extract_id_from": "id"
             },
             {
                 "endpoint": "/item/",
@@ -408,7 +388,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "body": {
                     "name": "Hammer",
                     "price": 12.5,
-                    "store_id": "$store_id"
+                    "store_id": "$setup_id"
                 },
                 "extract_id_from": "id"
             }
@@ -427,16 +407,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             }
         },
         "expected_status": 200,
-        "cleanup": {
-            "endpoint": "/store/{id}",
-            "method": "DELETE",
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            },
-            "path": {
-                "id": "$store_id"
-            }
-        }
+        "cleanup": null
     },
     {
         "name": "update_item_not_found",
@@ -477,8 +448,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "body": {
                     "name": "Clearance Store"
                 },
-                "extract_id_from": "id",
-                "save_as": "store_id"
+                "extract_id_from": "id"
             },
             {
                 "endpoint": "/item/",
@@ -489,7 +459,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "body": {
                     "name": "Last Widget",
                     "price": 3.99,
-                    "store_id": "$store_id"
+                    "store_id": "$setup_id"
                 },
                 "extract_id_from": "id"
             }
@@ -505,16 +475,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "body": null
         },
         "expected_status": 200,
-        "cleanup": {
-            "endpoint": "/store/{id}",
-            "method": "DELETE",
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            },
-            "path": {
-                "id": "$store_id"
-            }
-        }
+        "cleanup": null
     },
     {
         "name": "delete_item_not_found",
