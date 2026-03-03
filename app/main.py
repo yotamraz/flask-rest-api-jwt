@@ -6,8 +6,10 @@ served by Uvicorn.
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
+from .auth import MissingAuthError
 from .database import engine
 from .models import Base
 from .routers import health, users
@@ -24,6 +26,14 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     """Application factory — creates and configures the FastAPI instance."""
     app = FastAPI(title="Flask-REST-API-JWT (FastAPI)", lifespan=lifespan)
+
+    # Exception handler for missing auth (matches Flask-JWT-Extended {"msg": ...} format)
+    @app.exception_handler(MissingAuthError)
+    async def missing_auth_handler(request: Request, exc: MissingAuthError):
+        return JSONResponse(
+            status_code=401,
+            content={"msg": exc.msg},
+        )
 
     app.include_router(health.router)
     app.include_router(users.router)

@@ -1,7 +1,7 @@
 """JWT authentication utilities and FastAPI dependencies.
 
 Replaces Flask-JWT-Extended usage with python-jose for token management
-and passlib[bcrypt] for password hashing.
+and bcrypt for password hashing.
 """
 
 from __future__ import annotations
@@ -21,16 +21,28 @@ from .database import get_db
 from .models import User
 
 # ---------------------------------------------------------------------------
-# Security scheme
+# Security scheme (auto_error=False so we control the 401 response format)
 # ---------------------------------------------------------------------------
 
-bearer_scheme = HTTPBearer()
+bearer_scheme = HTTPBearer(auto_error=False)
 
 # ---------------------------------------------------------------------------
 # Token blocklist (in-memory set, matching Flask source behaviour)
 # ---------------------------------------------------------------------------
 
 token_blocklist: set[str] = set()
+
+# ---------------------------------------------------------------------------
+# Custom exception for missing/invalid auth (matches Flask-JWT-Extended format)
+# ---------------------------------------------------------------------------
+
+
+class MissingAuthError(Exception):
+    """Raised when the Authorization header is missing."""
+
+    def __init__(self, msg: str = "Missing Authorization Header"):
+        self.msg = msg
+
 
 # ---------------------------------------------------------------------------
 # JWT helpers
@@ -87,20 +99,34 @@ def decode_token(token: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Auth token dependency (checks bearer is present)
+# ---------------------------------------------------------------------------
+
+
+async def require_auth_token(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_scheme),
+) -> str:
+    """Dependency that ensures a Bearer token is present.
+
+    Raises MissingAuthError (-> 401 with {"msg": "Missing Authorization Header"})
+    if no token is provided, matching Flask-JWT-Extended behaviour.
+    """
+    if credentials is None:
+        raise MissingAuthError()
+    return credentials.credentials
+
+
+# ---------------------------------------------------------------------------
 # FastAPI dependencies
 # ---------------------------------------------------------------------------
 
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    token: str = Depends(require_auth_token),
     db: AsyncSession = Depends(get_db),
 ) -> User:
-    """Dependency that extracts and validates an **access** JWT, then loads the user.
-
-    Raises 401 if the token is missing, invalid, expired, revoked, or not an
-    access token.
-    """
-    payload = decode_token(credentials.credentials)
+    """Dependency that extracts and validates an **access** JWT, then loads the user."""
+    payload = decode_token(token)
 
     if payload.get("type") != "access":
         raise HTTPException(
@@ -127,15 +153,11 @@ async def get_current_user(
 
 
 async def get_current_user_from_refresh(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    token: str = Depends(require_auth_token),
     db: AsyncSession = Depends(get_db),
 ) -> tuple[User, dict]:
-    """Dependency that extracts and validates a **refresh** JWT, then loads the user.
-
-    Returns a tuple of (user, token_payload) so the router can access the jti
-    for revocation if needed.
-    """
-    payload = decode_token(credentials.credentials)
+    """Dependency that extracts and validates a **refresh** JWT, then loads the user."""
+    payload = decode_token(token)
 
     if payload.get("type") != "refresh":
         raise HTTPException(
