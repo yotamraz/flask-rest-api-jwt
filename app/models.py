@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from passlib.hash import bcrypt
+import bcrypt
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -31,10 +31,13 @@ class User(Base):
     )
 
     def set_password(self, password: str) -> None:
-        self.password_hash = bcrypt.hash(password)
+        pw_bytes = password.encode("utf-8")
+        self.password_hash = bcrypt.hashpw(pw_bytes, bcrypt.gensalt()).decode("utf-8")
 
     def check_password(self, password: str) -> bool:
-        return bcrypt.verify(password, self.password_hash)
+        pw_bytes = password.encode("utf-8")
+        hash_bytes = self.password_hash.encode("utf-8")
+        return bcrypt.checkpw(pw_bytes, hash_bytes)
 
 
 class Store(Base):
