@@ -148,3 +148,8 @@ nosetests.xml
 coverage.xml
 *.cover
 *.py,cover
+
+# ----- Project-specific -----
+*.sqlite
+data-dev.sqlite
+instance/
