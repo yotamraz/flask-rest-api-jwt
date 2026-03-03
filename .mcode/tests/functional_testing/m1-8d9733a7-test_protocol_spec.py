@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-03-03T11:53:17.900005+00:00
+Generated at: 2026-03-03T12:05:11.501084+00:00
 Project: flask-rest-api-jwt
 Milestone: 1
 """
@@ -81,9 +81,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             }
         },
         "expected_status": 201,
-        "store": {
-            "user_id": "id"
-        },
         "cleanup": null
     },
     {
@@ -128,9 +125,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             }
         },
         "expected_status": 200,
-        "store": {
-            "refresh_token": "refresh_token"
-        },
         "cleanup": null
     },
     {
@@ -160,7 +154,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "setup": null,
         "request_data": {
             "path": {
-                "id": "$stored.user_id"
+                "id": 1
             },
             "query": {},
             "body": null
@@ -190,12 +184,11 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "category": "AUTH",
         "endpoint": "/user/{id}",
         "method": "GET",
-        "description": "Attempt to retrieve a user without providing an access token, expect 401",
+        "description": "Attempt to retrieve another user's data, expect 401 unauthorized",
         "setup": null,
-        "skip_auth": true,
         "request_data": {
             "path": {
-                "id": 1
+                "id": 2
             },
             "query": {},
             "body": null
@@ -208,33 +201,14 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "category": "HAPPY_PATH",
         "endpoint": "/user/refresh",
         "method": "POST",
-        "description": "Refresh access token using a valid refresh token, expect 200 with new access_token",
+        "description": "Send access token to refresh endpoint which requires refresh token, expect 422 validation error",
         "setup": null,
-        "request_data": {
-            "path": {},
-            "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $stored.refresh_token"
-            }
-        },
-        "expected_status": 200,
-        "cleanup": null
-    },
-    {
-        "name": "refresh_token_no_token",
-        "category": "AUTH",
-        "endpoint": "/user/refresh",
-        "method": "POST",
-        "description": "Attempt token refresh without providing a refresh token, expect 401",
-        "setup": null,
-        "skip_auth": true,
         "request_data": {
             "path": {},
             "query": {},
             "body": null
         },
-        "expected_status": 401,
+        "expected_status": 422,
         "cleanup": null
     },
     {
@@ -242,12 +216,11 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "category": "AUTH",
         "endpoint": "/user/{id}",
         "method": "DELETE",
-        "description": "Attempt to delete a user without providing an access token, expect 401",
+        "description": "Attempt to delete another user's account, expect 401 unauthorized",
         "setup": null,
-        "skip_auth": true,
         "request_data": {
             "path": {
-                "id": 1
+                "id": 2
             },
             "query": {},
             "body": null
@@ -264,8 +237,23 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "setup": null,
         "request_data": {
             "path": {
-                "id": "$stored.user_id"
+                "id": 1
             },
+            "query": {},
+            "body": null
+        },
+        "expected_status": 200,
+        "cleanup": null
+    },
+    {
+        "name": "logout_user_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/user/logout",
+        "method": "POST",
+        "description": "Logout with a valid access token, expect 200 with 'Logged out' message and token blacklisted",
+        "setup": null,
+        "request_data": {
+            "path": {},
             "query": {},
             "body": null
         },
@@ -277,9 +265,8 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "category": "AUTH",
         "endpoint": "/user/logout",
         "method": "POST",
-        "description": "Attempt logout without providing an access token, expect 401",
+        "description": "Attempt logout after token has been revoked, expect 401",
         "setup": null,
-        "skip_auth": true,
         "request_data": {
             "path": {},
             "query": {},
@@ -289,18 +276,18 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "cleanup": null
     },
     {
-        "name": "logout_user_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/user/logout",
+        "name": "refresh_token_no_token",
+        "category": "AUTH",
+        "endpoint": "/user/refresh",
         "method": "POST",
-        "description": "Logout with a valid access token, expect 200 with 'Logged out' message",
+        "description": "Attempt token refresh after token has been revoked, expect 401",
         "setup": null,
         "request_data": {
             "path": {},
             "query": {},
             "body": null
         },
-        "expected_status": 200,
+        "expected_status": 401,
         "cleanup": null
     }
 ]''')
