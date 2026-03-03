@@ -10,7 +10,7 @@ from fastapi import FastAPI
 
 from .database import engine
 from .models import Base
-from .routers import health
+from .routers import health, users
 
 
 @asynccontextmanager
@@ -26,6 +26,7 @@ def create_app() -> FastAPI:
     app = FastAPI(title="Flask-REST-API-JWT (FastAPI)", lifespan=lifespan)
 
     app.include_router(health.router)
+    app.include_router(users.router)
 
     return app
 
