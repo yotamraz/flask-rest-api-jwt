@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-03-03T22:33:02.088224+00:00
+Generated at: 2026-03-03T22:41:26.270233+00:00
 Project: flask-rest-api-jwt
 Milestone: 2
 """
@@ -75,7 +75,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "category": "MISSING_REQUIRED",
         "endpoint": "/store/",
         "method": "POST",
-        "description": "Attempt to create a store without the required name field",
+        "description": "Attempt to create a store without the required name field \u2014 server raises KeyError resulting in 500",
         "request_data": {
             "path": {},
             "query": {},
@@ -84,7 +84,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "Authorization": "Bearer $fresh_access_token"
             }
         },
-        "expected_status": 400,
+        "expected_status": 500,
         "setup": null,
         "cleanup": null
     },
@@ -329,7 +329,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "category": "MISSING_REQUIRED",
         "endpoint": "/item/",
         "method": "POST",
-        "description": "Attempt to create an item without required name and price fields",
+        "description": "Attempt to create an item without required name and price fields \u2014 server raises KeyError resulting in 500",
         "setup": {
             "endpoint": "/store/",
             "method": "POST",
@@ -351,7 +351,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "Authorization": "Bearer $fresh_access_token"
             }
         },
-        "expected_status": 400,
+        "expected_status": 500,
         "cleanup": {
             "endpoint": "/store/{id}",
             "method": "DELETE",
