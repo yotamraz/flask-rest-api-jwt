@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-03-03T13:54:29.641009+00:00
+Generated at: 2026-03-03T13:59:20.862170+00:00
 Project: flask-rest-api-jwt
 Milestone: 1
 """
@@ -118,6 +118,9 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             }
         },
         "expected_status": 200,
+        "store": {
+            "refresh_token": "refresh_token"
+        },
         "cleanup": null
     },
     {
@@ -139,72 +142,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "cleanup": null
     },
     {
-        "name": "logout_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/user/logout",
-        "method": "POST",
-        "description": "Logout with a valid access token, expect 200 with logged out message",
-        "setup": null,
-        "request_data": {
-            "path": {},
-            "query": {},
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            },
-            "body": null
-        },
-        "expected_status": 200,
-        "cleanup": null
-    },
-    {
-        "name": "logout_missing_auth",
-        "category": "AUTH",
-        "endpoint": "/user/logout",
-        "method": "POST",
-        "description": "Attempt to logout without providing an authorization token, expect 401",
-        "setup": null,
-        "request_data": {
-            "path": {},
-            "query": {},
-            "body": null
-        },
-        "expected_status": 401,
-        "cleanup": null
-    },
-    {
-        "name": "refresh_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/user/refresh",
-        "method": "POST",
-        "description": "Refresh access token using a valid refresh token, expect 200 with new access_token",
-        "setup": null,
-        "request_data": {
-            "path": {},
-            "query": {},
-            "headers": {
-                "Authorization": "Bearer $fresh_refresh_token"
-            },
-            "body": null
-        },
-        "expected_status": 200,
-        "cleanup": null
-    },
-    {
-        "name": "refresh_missing_auth",
-        "category": "AUTH",
-        "endpoint": "/user/refresh",
-        "method": "POST",
-        "description": "Attempt to refresh without providing a refresh token, expect 401",
-        "setup": null,
-        "request_data": {
-            "path": {},
-            "query": {},
-            "body": null
-        },
-        "expected_status": 401,
-        "cleanup": null
-    },
-    {
         "name": "get_user_not_found",
         "category": "NOT_FOUND",
         "endpoint": "/user/{id}",
@@ -216,9 +153,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "id": 99999
             },
             "query": {},
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            },
             "body": null
         },
         "expected_status": 404,
@@ -253,9 +187,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "id": 99999
             },
             "query": {},
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            },
             "body": null
         },
         "expected_status": 404,
@@ -272,6 +203,71 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "path": {
                 "id": 1
             },
+            "query": {},
+            "body": null
+        },
+        "expected_status": 401,
+        "cleanup": null
+    },
+    {
+        "name": "refresh_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/user/refresh",
+        "method": "POST",
+        "description": "Refresh access token using a valid refresh token, expect 200 with new access_token",
+        "setup": null,
+        "request_data": {
+            "path": {},
+            "query": {},
+            "headers": {
+                "Authorization": "Bearer $stored.refresh_token"
+            },
+            "body": null
+        },
+        "expected_status": 200,
+        "cleanup": null
+    },
+    {
+        "name": "refresh_missing_auth",
+        "category": "AUTH",
+        "endpoint": "/user/refresh",
+        "method": "POST",
+        "description": "Attempt to refresh without providing a refresh token, expect 401",
+        "skip_auth": true,
+        "setup": null,
+        "request_data": {
+            "path": {},
+            "query": {},
+            "body": null
+        },
+        "expected_status": 401,
+        "cleanup": null
+    },
+    {
+        "name": "logout_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/user/logout",
+        "method": "POST",
+        "description": "Logout with a valid access token, expect 200 with logged out message",
+        "setup": null,
+        "request_data": {
+            "path": {},
+            "query": {},
+            "body": null
+        },
+        "expected_status": 200,
+        "cleanup": null
+    },
+    {
+        "name": "logout_missing_auth",
+        "category": "AUTH",
+        "endpoint": "/user/logout",
+        "method": "POST",
+        "description": "Attempt to logout without providing an authorization token, expect 401",
+        "skip_auth": true,
+        "setup": null,
+        "request_data": {
+            "path": {},
             "query": {},
             "body": null
         },
