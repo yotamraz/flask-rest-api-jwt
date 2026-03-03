@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-03-03T11:37:07.188169+00:00
+Generated at: 2026-03-03T11:46:24.758101+00:00
 Project: flask-rest-api-jwt
 Milestone: 3
 """
@@ -51,11 +51,45 @@ def resolve_env_placeholders(obj: Any) -> Any:
 TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
     json.loads(r'''[
     {
+        "name": "register_tag_test_user",
+        "category": "SETUP",
+        "endpoint": "/user/register",
+        "method": "POST",
+        "description": "Register a test user for tag endpoint testing.",
+        "skip_auth": true,
+        "request_data": {
+            "body": {
+                "username": "tagtestuser",
+                "password": "testpass123"
+            }
+        },
+        "expected_status": 201,
+        "setup": null,
+        "cleanup": null
+    },
+    {
+        "name": "login_tag_test_user",
+        "category": "SETUP",
+        "endpoint": "/user/login",
+        "method": "POST",
+        "description": "Login the test user to obtain JWT access token for subsequent tests.",
+        "skip_auth": true,
+        "request_data": {
+            "body": {
+                "username": "tagtestuser",
+                "password": "testpass123"
+            }
+        },
+        "expected_status": 200,
+        "setup": null,
+        "cleanup": null
+    },
+    {
         "name": "create_tag_happy_path",
         "category": "HAPPY_PATH",
         "endpoint": "/tag/store/{store_id}",
         "method": "POST",
-        "description": "Register a user, login, create a store, then create a tag in that store. Expects 201 with tag data.",
+        "description": "Create a store via setup, then create a tag in that store. Expects 201 with tag data.",
         "setup": {
             "endpoint": "/store/",
             "method": "POST",
@@ -68,19 +102,61 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "path": {
                 "store_id": "$setup_id"
             },
-            "query": {},
             "body": {
                 "name": "electronics"
             }
         },
         "expected_status": 201,
-        "cleanup": {
-            "endpoint": "/store/{id}",
-            "method": "DELETE",
+        "store": {
+            "test_tag_id": "id",
+            "test_store_id": "store_id"
+        },
+        "cleanup": null
+    },
+    {
+        "name": "get_tag_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/tag/{id}",
+        "method": "GET",
+        "description": "Retrieve the tag created in the previous test by ID. Expects 200 with tag data.",
+        "request_data": {
             "path": {
-                "id": "$setup_id"
+                "id": "$stored.test_tag_id"
             }
-        }
+        },
+        "expected_status": 200,
+        "setup": null,
+        "cleanup": null
+    },
+    {
+        "name": "list_tags_in_store_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/tag/store/{store_id}/s",
+        "method": "GET",
+        "description": "List all tags in the store created earlier. Expects 200 with an array of tags.",
+        "request_data": {
+            "path": {
+                "store_id": "$stored.test_store_id"
+            }
+        },
+        "expected_status": 200,
+        "setup": null,
+        "cleanup": null
+    },
+    {
+        "name": "delete_tag_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/tag/{id}",
+        "method": "DELETE",
+        "description": "Delete the tag created earlier. Expects 200 with message 'Deleted'.",
+        "request_data": {
+            "path": {
+                "id": "$stored.test_tag_id"
+            }
+        },
+        "expected_status": 200,
+        "setup": null,
+        "cleanup": null
     },
     {
         "name": "create_tag_store_not_found",
@@ -92,9 +168,53 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "path": {
                 "store_id": 999999
             },
-            "query": {},
             "body": {
                 "name": "orphan-tag"
+            }
+        },
+        "expected_status": 404,
+        "setup": null,
+        "cleanup": null
+    },
+    {
+        "name": "get_tag_not_found",
+        "category": "NOT_FOUND",
+        "endpoint": "/tag/{id}",
+        "method": "GET",
+        "description": "Attempt to retrieve a tag that does not exist. Expects 404.",
+        "request_data": {
+            "path": {
+                "id": 999999
+            }
+        },
+        "expected_status": 404,
+        "setup": null,
+        "cleanup": null
+    },
+    {
+        "name": "list_tags_store_not_found",
+        "category": "NOT_FOUND",
+        "endpoint": "/tag/store/{store_id}/s",
+        "method": "GET",
+        "description": "Attempt to list tags for a non-existent store. Expects 404.",
+        "request_data": {
+            "path": {
+                "store_id": 999999
+            }
+        },
+        "expected_status": 404,
+        "setup": null,
+        "cleanup": null
+    },
+    {
+        "name": "delete_tag_not_found",
+        "category": "NOT_FOUND",
+        "endpoint": "/tag/{id}",
+        "method": "DELETE",
+        "description": "Attempt to delete a tag that does not exist. Expects 404.",
+        "request_data": {
+            "path": {
+                "id": 999999
             }
         },
         "expected_status": 404,
@@ -107,198 +227,16 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "endpoint": "/tag/store/{store_id}",
         "method": "POST",
         "description": "Attempt to create a tag without providing a JWT token. Expects 401.",
+        "skip_auth": true,
         "request_data": {
             "path": {
                 "store_id": 1
             },
-            "query": {},
             "body": {
                 "name": "no-auth-tag"
-            },
-            "headers": {
-                "Authorization": ""
             }
         },
         "expected_status": 401,
-        "setup": null,
-        "cleanup": null
-    },
-    {
-        "name": "get_tag_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/tag/{id}",
-        "method": "GET",
-        "description": "Create a store and a tag, then retrieve the tag by ID. Expects 200 with tag data.",
-        "setup": {
-            "endpoint": "/store/",
-            "method": "POST",
-            "body": {
-                "name": "Get Tag Store"
-            },
-            "extract_id_from": "id",
-            "chain": [
-                {
-                    "endpoint": "/tag/store/{parent_id}",
-                    "method": "POST",
-                    "body": {
-                        "name": "fetched-tag"
-                    },
-                    "extract_id_from": "id"
-                }
-            ]
-        },
-        "request_data": {
-            "path": {
-                "id": "$setup_id"
-            },
-            "query": {},
-            "body": null
-        },
-        "expected_status": 200,
-        "cleanup": {
-            "endpoint": "/store/{id}",
-            "method": "DELETE",
-            "path": {
-                "id": "$setup_parent_id"
-            }
-        }
-    },
-    {
-        "name": "get_tag_not_found",
-        "category": "NOT_FOUND",
-        "endpoint": "/tag/{id}",
-        "method": "GET",
-        "description": "Attempt to retrieve a tag that does not exist. Expects 404.",
-        "request_data": {
-            "path": {
-                "id": 999999
-            },
-            "query": {},
-            "body": null
-        },
-        "expected_status": 404,
-        "setup": null,
-        "cleanup": null
-    },
-    {
-        "name": "list_tags_in_store_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/tag/store/{store_id}/s",
-        "method": "GET",
-        "description": "Create a store with two tags, then list all tags in that store. Expects 200 with an array of tags.",
-        "setup": {
-            "endpoint": "/store/",
-            "method": "POST",
-            "body": {
-                "name": "List Tags Store"
-            },
-            "extract_id_from": "id",
-            "chain": [
-                {
-                    "endpoint": "/tag/store/{parent_id}",
-                    "method": "POST",
-                    "body": {
-                        "name": "tag-alpha"
-                    },
-                    "extract_id_from": "id"
-                },
-                {
-                    "endpoint": "/tag/store/{parent_id}",
-                    "method": "POST",
-                    "body": {
-                        "name": "tag-beta"
-                    },
-                    "extract_id_from": "id"
-                }
-            ]
-        },
-        "request_data": {
-            "path": {
-                "store_id": "$setup_parent_id"
-            },
-            "query": {},
-            "body": null
-        },
-        "expected_status": 200,
-        "cleanup": {
-            "endpoint": "/store/{id}",
-            "method": "DELETE",
-            "path": {
-                "id": "$setup_parent_id"
-            }
-        }
-    },
-    {
-        "name": "list_tags_store_not_found",
-        "category": "NOT_FOUND",
-        "endpoint": "/tag/store/{store_id}/s",
-        "method": "GET",
-        "description": "Attempt to list tags for a non-existent store. Expects 404.",
-        "request_data": {
-            "path": {
-                "store_id": 999999
-            },
-            "query": {},
-            "body": null
-        },
-        "expected_status": 404,
-        "setup": null,
-        "cleanup": null
-    },
-    {
-        "name": "delete_tag_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/tag/{id}",
-        "method": "DELETE",
-        "description": "Create a store and a tag, then delete the tag. Expects 200 with message 'Deleted'.",
-        "setup": {
-            "endpoint": "/store/",
-            "method": "POST",
-            "body": {
-                "name": "Delete Tag Store"
-            },
-            "extract_id_from": "id",
-            "chain": [
-                {
-                    "endpoint": "/tag/store/{parent_id}",
-                    "method": "POST",
-                    "body": {
-                        "name": "doomed-tag"
-                    },
-                    "extract_id_from": "id"
-                }
-            ]
-        },
-        "request_data": {
-            "path": {
-                "id": "$setup_id"
-            },
-            "query": {},
-            "body": null
-        },
-        "expected_status": 200,
-        "cleanup": {
-            "endpoint": "/store/{id}",
-            "method": "DELETE",
-            "path": {
-                "id": "$setup_parent_id"
-            }
-        }
-    },
-    {
-        "name": "delete_tag_not_found",
-        "category": "NOT_FOUND",
-        "endpoint": "/tag/{id}",
-        "method": "DELETE",
-        "description": "Attempt to delete a tag that does not exist. Expects 404.",
-        "request_data": {
-            "path": {
-                "id": 999999
-            },
-            "query": {},
-            "body": null
-        },
-        "expected_status": 404,
         "setup": null,
         "cleanup": null
     },
@@ -308,14 +246,10 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "endpoint": "/tag/{id}",
         "method": "GET",
         "description": "Attempt to get a tag without providing a JWT token. Expects 401.",
+        "skip_auth": true,
         "request_data": {
             "path": {
                 "id": 1
-            },
-            "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": ""
             }
         },
         "expected_status": 401,
@@ -328,14 +262,10 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "endpoint": "/tag/store/{store_id}/s",
         "method": "GET",
         "description": "Attempt to list tags without providing a JWT token. Expects 401.",
+        "skip_auth": true,
         "request_data": {
             "path": {
                 "store_id": 1
-            },
-            "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": ""
             }
         },
         "expected_status": 401,
@@ -348,14 +278,10 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "endpoint": "/tag/{id}",
         "method": "DELETE",
         "description": "Attempt to delete a tag without providing a JWT token. Expects 401.",
+        "skip_auth": true,
         "request_data": {
             "path": {
                 "id": 1
-            },
-            "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": ""
             }
         },
         "expected_status": 401,
@@ -367,7 +293,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
 
 # Base URL for API requests (from app discovery, includes host:port)
 BASE_URL = os.path.expandvars("http://localhost:5000")
-HEALTH_CHECK_ENDPOINT = os.path.expandvars("/health")
+HEALTH_CHECK_ENDPOINT = os.path.expandvars("/health/")
 REQUEST_TIMEOUT = 30
 HEALTH_CHECK_URL = f"{BASE_URL.rstrip('/')}/{HEALTH_CHECK_ENDPOINT.lstrip('/')}"
 # Per-endpoint routing table for microservices DST
