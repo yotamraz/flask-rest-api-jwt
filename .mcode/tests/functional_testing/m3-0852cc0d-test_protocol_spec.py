@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-03-03T14:04:23.295252+00:00
+Generated at: 2026-03-03T14:11:12.329381+00:00
 Project: flask-rest-api-jwt
 Milestone: 3
 """
@@ -51,6 +51,30 @@ def resolve_env_placeholders(obj: Any) -> Any:
 TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
     json.loads(r'''[
     {
+        "name": "auth_login",
+        "category": "AUTH",
+        "endpoint": "/user/login",
+        "method": "POST",
+        "description": "Register a test user (setup) then login to establish auth session. The access_token in the response auto-populates the auth session for all subsequent tests.",
+        "setup": {
+            "endpoint": "/user/register",
+            "method": "POST",
+            "body": {
+                "username": "testuser",
+                "password": "testpassword123"
+            },
+            "required": false
+        },
+        "request_data": {
+            "body": {
+                "username": "testuser",
+                "password": "testpassword123"
+            }
+        },
+        "expected_status": 200,
+        "cleanup": null
+    },
+    {
         "name": "create_tag_happy_path",
         "category": "HAPPY_PATH",
         "endpoint": "/tag/store/{store_id}",
@@ -62,9 +86,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "body": {
                 "name": "Tag Test Store"
             },
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            },
             "extract_id_from": "id"
         },
         "request_data": {
@@ -74,9 +95,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "query": {},
             "body": {
                 "name": "electronics"
-            },
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
             }
         },
         "expected_status": 201,
@@ -85,9 +103,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "method": "DELETE",
             "path": {
                 "id": "$setup_id"
-            },
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
             }
         }
     },
@@ -105,9 +120,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "query": {},
             "body": {
                 "name": "phantom-tag"
-            },
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
             }
         },
         "expected_status": 404,
@@ -119,6 +131,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "endpoint": "/tag/store/{store_id}",
         "method": "POST",
         "description": "Attempt to create a tag without providing a JWT token. Expects 401.",
+        "skip_auth": true,
         "setup": null,
         "request_data": {
             "path": {
@@ -144,10 +157,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "id": 99999
             },
             "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
+            "body": null
         },
         "expected_status": 404,
         "cleanup": null
@@ -158,6 +168,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "endpoint": "/tag/{id}",
         "method": "GET",
         "description": "Attempt to retrieve a tag without providing a JWT token. Expects 401.",
+        "skip_auth": true,
         "setup": null,
         "request_data": {
             "path": {
@@ -181,9 +192,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "body": {
                 "name": "List Tags Store"
             },
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            },
             "extract_id_from": "id"
         },
         "request_data": {
@@ -191,10 +199,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "store_id": "$setup_id"
             },
             "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
+            "body": null
         },
         "expected_status": 200,
         "cleanup": {
@@ -202,9 +207,6 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "method": "DELETE",
             "path": {
                 "id": "$setup_id"
-            },
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
             }
         }
     },
@@ -220,10 +222,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "store_id": 99999
             },
             "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
+            "body": null
         },
         "expected_status": 404,
         "cleanup": null
@@ -240,10 +239,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
                 "id": 99999
             },
             "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
+            "body": null
         },
         "expected_status": 404,
         "cleanup": null
@@ -254,6 +250,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "endpoint": "/tag/{id}",
         "method": "DELETE",
         "description": "Attempt to delete a tag without providing a JWT token. Expects 401.",
+        "skip_auth": true,
         "setup": null,
         "request_data": {
             "path": {
