@@ -9,7 +9,7 @@ This script supports two modes:
 1. SRC Validation: Tests endpoints and captures responses (no expected_response)
 2. DST Contract Validation: Tests endpoints and validates responses match expected (has expected_response)
 
-Generated at: 2026-03-03T11:39:21.331303+00:00
+Generated at: 2026-03-03T11:53:17.900005+00:00
 Project: flask-rest-api-jwt
 Milestone: 1
 """
@@ -76,11 +76,14 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "path": {},
             "query": {},
             "body": {
-                "username": "newuser_reg1",
+                "username": "testuser_main",
                 "password": "${TEST_PASSWORD}"
             }
         },
         "expected_status": 201,
+        "store": {
+            "user_id": "id"
+        },
         "cleanup": null
     },
     {
@@ -115,24 +118,19 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "endpoint": "/user/login",
         "method": "POST",
         "description": "Login with valid credentials after registering a user, expect 200 with access_token and refresh_token",
-        "setup": {
-            "endpoint": "/user/register",
-            "method": "POST",
-            "body": {
-                "username": "loginuser1",
-                "password": "${TEST_PASSWORD}"
-            },
-            "extract_id_from": "id"
-        },
+        "setup": null,
         "request_data": {
             "path": {},
             "query": {},
             "body": {
-                "username": "loginuser1",
+                "username": "testuser_main",
                 "password": "${TEST_PASSWORD}"
             }
         },
         "expected_status": 200,
+        "store": {
+            "refresh_token": "refresh_token"
+        },
         "cleanup": null
     },
     {
@@ -154,32 +152,51 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "cleanup": null
     },
     {
-        "name": "logout_user_happy_path",
+        "name": "get_user_happy_path",
         "category": "HAPPY_PATH",
-        "endpoint": "/user/logout",
-        "method": "POST",
-        "description": "Logout with a valid access token, expect 200 with 'Logged out' message",
+        "endpoint": "/user/{id}",
+        "method": "GET",
+        "description": "Retrieve own user data by ID using the logged-in user's access token",
         "setup": null,
         "request_data": {
-            "path": {},
+            "path": {
+                "id": "$stored.user_id"
+            },
             "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
+            "body": null
         },
         "expected_status": 200,
         "cleanup": null
     },
     {
-        "name": "logout_user_no_token",
-        "category": "AUTH",
-        "endpoint": "/user/logout",
-        "method": "POST",
-        "description": "Attempt logout without providing an access token, expect 401",
+        "name": "get_user_not_found",
+        "category": "NOT_FOUND",
+        "endpoint": "/user/{id}",
+        "method": "GET",
+        "description": "Attempt to retrieve a non-existent user by ID, expect 404",
         "setup": null,
         "request_data": {
-            "path": {},
+            "path": {
+                "id": 99999
+            },
+            "query": {},
+            "body": null
+        },
+        "expected_status": 404,
+        "cleanup": null
+    },
+    {
+        "name": "get_user_no_token",
+        "category": "AUTH",
+        "endpoint": "/user/{id}",
+        "method": "GET",
+        "description": "Attempt to retrieve a user without providing an access token, expect 401",
+        "setup": null,
+        "skip_auth": true,
+        "request_data": {
+            "path": {
+                "id": 1
+            },
             "query": {},
             "body": null
         },
@@ -198,7 +215,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
             "query": {},
             "body": null,
             "headers": {
-                "Authorization": "Bearer $fresh_refresh_token"
+                "Authorization": "Bearer $stored.refresh_token"
             }
         },
         "expected_status": 200,
@@ -211,6 +228,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "method": "POST",
         "description": "Attempt token refresh without providing a refresh token, expect 401",
         "setup": null,
+        "skip_auth": true,
         "request_data": {
             "path": {},
             "query": {},
@@ -220,60 +238,13 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "cleanup": null
     },
     {
-        "name": "get_user_happy_path",
-        "category": "HAPPY_PATH",
-        "endpoint": "/user/{id}",
-        "method": "GET",
-        "description": "Register a user, then retrieve own user data by ID using that user's access token",
-        "setup": {
-            "endpoint": "/user/register",
-            "method": "POST",
-            "body": {
-                "username": "getuser1",
-                "password": "${TEST_PASSWORD}"
-            },
-            "extract_id_from": "id"
-        },
-        "request_data": {
-            "path": {
-                "id": "$setup_id"
-            },
-            "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
-        },
-        "expected_status": 200,
-        "cleanup": null
-    },
-    {
-        "name": "get_user_not_found",
-        "category": "NOT_FOUND",
-        "endpoint": "/user/{id}",
-        "method": "GET",
-        "description": "Attempt to retrieve a non-existent user by ID, expect 404",
-        "setup": null,
-        "request_data": {
-            "path": {
-                "id": 99999
-            },
-            "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
-        },
-        "expected_status": 404,
-        "cleanup": null
-    },
-    {
-        "name": "get_user_no_token",
+        "name": "delete_user_no_token",
         "category": "AUTH",
         "endpoint": "/user/{id}",
-        "method": "GET",
-        "description": "Attempt to retrieve a user without providing an access token, expect 401",
+        "method": "DELETE",
+        "description": "Attempt to delete a user without providing an access token, expect 401",
         "setup": null,
+        "skip_auth": true,
         "request_data": {
             "path": {
                 "id": 1
@@ -289,44 +260,47 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
         "category": "HAPPY_PATH",
         "endpoint": "/user/{id}",
         "method": "DELETE",
-        "description": "Register a user, then delete own account by ID using that user's access token, expect 200 with 'Deleted' message",
-        "setup": {
-            "endpoint": "/user/register",
-            "method": "POST",
-            "body": {
-                "username": "deleteuser1",
-                "password": "${TEST_PASSWORD}"
-            },
-            "extract_id_from": "id"
-        },
+        "description": "Delete own account by ID using the logged-in user's access token, expect 200 with 'Deleted' message",
+        "setup": null,
         "request_data": {
             "path": {
-                "id": "$setup_id"
+                "id": "$stored.user_id"
             },
             "query": {},
-            "body": null,
-            "headers": {
-                "Authorization": "Bearer $fresh_access_token"
-            }
+            "body": null
         },
         "expected_status": 200,
         "cleanup": null
     },
     {
-        "name": "delete_user_no_token",
+        "name": "logout_user_no_token",
         "category": "AUTH",
-        "endpoint": "/user/{id}",
-        "method": "DELETE",
-        "description": "Attempt to delete a user without providing an access token, expect 401",
+        "endpoint": "/user/logout",
+        "method": "POST",
+        "description": "Attempt logout without providing an access token, expect 401",
         "setup": null,
+        "skip_auth": true,
         "request_data": {
-            "path": {
-                "id": 1
-            },
+            "path": {},
             "query": {},
             "body": null
         },
         "expected_status": 401,
+        "cleanup": null
+    },
+    {
+        "name": "logout_user_happy_path",
+        "category": "HAPPY_PATH",
+        "endpoint": "/user/logout",
+        "method": "POST",
+        "description": "Logout with a valid access token, expect 200 with 'Logged out' message",
+        "setup": null,
+        "request_data": {
+            "path": {},
+            "query": {},
+            "body": null
+        },
+        "expected_status": 200,
         "cleanup": null
     }
 ]''')
@@ -334,7 +308,7 @@ TEST_CASES: list[dict[str, Any]] = resolve_env_placeholders(
 
 # Base URL for API requests (from app discovery, includes host:port)
 BASE_URL = os.path.expandvars("http://localhost:5000")
-HEALTH_CHECK_ENDPOINT = os.path.expandvars("/health")
+HEALTH_CHECK_ENDPOINT = os.path.expandvars("/health/")
 REQUEST_TIMEOUT = 30
 HEALTH_CHECK_URL = f"{BASE_URL.rstrip('/')}/{HEALTH_CHECK_ENDPOINT.lstrip('/')}"
 # Per-endpoint routing table for microservices DST
