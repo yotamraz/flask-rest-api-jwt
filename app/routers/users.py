@@ -44,6 +44,7 @@ async def register(request: Request, db: AsyncSession = Depends(get_db)):
     db.add(user)
     await db.flush()
     await db.refresh(user)
+    await db.commit()
     return JSONResponse(
         status_code=201,
         content={"id": user.id, "username": user.username},
@@ -133,4 +134,5 @@ async def delete_user(
     if current_user.id != id:
         return JSONResponse(status_code=401, content={"message": "Unauthorized"})
     await db.delete(user)
+    await db.commit()
     return JSONResponse(status_code=200, content={"message": "Deleted"})
