@@ -1,0 +1,21 @@
+# Web framework & server
+fastapi==0.115.8
+uvicorn[standard]==0.34.0
+
+# ORM & database
+sqlalchemy[asyncio]==2.0.37
+asyncpg==0.30.0
+aiosqlite==0.20.0
+
+# Authentication & security
+python-jose[cryptography]==3.3.0
+bcrypt==4.2.1
+
+# Configuration
+pydantic-settings==2.7.1
+
+# Testing
+httpx==0.28.1
+pytest==8.3.4
+pytest-asyncio==0.25.3
+requests>=2.31.0
