@@ -1,6 +1,7 @@
 """User management & authentication endpoints — mirrors Flask /user/ blueprint."""
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,9 +10,8 @@ from ..auth import (
     create_refresh_token,
     get_current_user,
     get_current_user_from_refresh,
-    get_jti_from_token,
+    get_validated_access_token,
     hash_password,
-    oauth2_scheme,
     token_blocklist,
     verify_password,
 )
@@ -32,9 +32,9 @@ async def register(
         select(User).where(User.username == data.username)
     )
     if result.scalar_one_or_none() is not None:
-        raise HTTPException(
+        return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User exists",
+            content={"message": "User exists"},
         )
 
     user = User(
@@ -58,9 +58,9 @@ async def login(
     )
     user = result.scalar_one_or_none()
     if user is None or not verify_password(data.password, user.password_hash):
-        raise HTTPException(
+        return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials",
+            content={"message": "Invalid credentials"},
         )
 
     access_token = create_access_token(user.id)
@@ -70,12 +70,12 @@ async def login(
 
 @router.post("/logout")
 async def logout(
-    token: str = Depends(oauth2_scheme),
-    _user: User = Depends(get_current_user),
+    payload: dict = Depends(get_validated_access_token),
 ):
     """Revoke the current access token (add its JTI to the blocklist)."""
-    jti = get_jti_from_token(token)
-    token_blocklist.add(jti)
+    jti = payload.get("jti")
+    if jti:
+        token_blocklist.add(jti)
     return {"message": "Logged out"}
 
 
