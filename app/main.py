@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
+from .auth import MissingAuthorizationError
 from .database import init_db
 
 
@@ -31,6 +32,17 @@ def create_app() -> FastAPI:
         return JSONResponse(
             status_code=exc.status_code,
             content={"message": exc.detail},
+        )
+
+    # ------------------------------------------------------------------
+    # Handler for missing Authorization header — matches Flask-JWT-Extended's
+    # default response format: {"msg": "Missing Authorization Header"}
+    # ------------------------------------------------------------------
+    @application.exception_handler(MissingAuthorizationError)
+    async def missing_auth_handler(request: Request, exc: MissingAuthorizationError):
+        return JSONResponse(
+            status_code=401,
+            content={"msg": "Missing Authorization Header"},
         )
 
     # ------------------------------------------------------------------
