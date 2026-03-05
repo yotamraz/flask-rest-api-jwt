@@ -140,6 +140,11 @@ pids/
 *.seed
 *.pid.lock
 
+# ----- SQLite databases -----
+*.sqlite
+*.db
+data-dev.sqlite
+
 # ----- Test / coverage -----
 coverage/
 *.lcov
