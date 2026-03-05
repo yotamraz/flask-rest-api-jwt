@@ -19,6 +19,15 @@ from .config import settings
 from .database import get_db
 from .models import User
 
+
+class MissingAuthorizationError(Exception):
+    """Raised when the Authorization header is missing.
+
+    Handled separately so the response uses ``{"msg": "Missing Authorization Header"}``
+    to match Flask-JWT-Extended's default error format.
+    """
+    pass
+
 # ---------------------------------------------------------------------------
 # Password hashing (bcrypt)
 # ---------------------------------------------------------------------------
@@ -125,10 +134,7 @@ async def get_current_user(
     Returns the authenticated ``User`` ORM instance.
     """
     if credentials is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing authentication token",
-        )
+        raise MissingAuthorizationError()
 
     payload = decode_token(credentials.credentials)
 
@@ -167,10 +173,7 @@ async def get_current_user_refresh(
     the JTI if needed.
     """
     if credentials is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing authentication token",
-        )
+        raise MissingAuthorizationError()
 
     payload = decode_token(credentials.credentials)
 

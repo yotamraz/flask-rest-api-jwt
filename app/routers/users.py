@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth import (
+    MissingAuthorizationError,
     create_access_token,
     create_refresh_token,
     decode_token,
@@ -61,11 +62,23 @@ async def login(payload: UserLogin, db: AsyncSession = Depends(get_db)):
 
 @router.post("/logout")
 async def logout(
-    current_user: User = Depends(get_current_user),
     credentials=Depends(bearer_scheme),
 ):
-    """Revoke the current access token."""
+    """Revoke the current access token.
+
+    Unlike other protected endpoints, this only validates the JWT — it does
+    NOT load the user from the DB.  This matches Flask-JWT-Extended's
+    ``@jwt_required()`` behaviour where ``get_jwt()`` is used directly
+    without a DB lookup, allowing logout even after the user row is deleted.
+    """
+    if credentials is None:
+        raise MissingAuthorizationError()
     payload = decode_token(credentials.credentials)
+    if payload.get("type") != "access":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token type",
+        )
     revoke_token(payload["jti"])
     return {"message": "Logged out"}
 
@@ -84,14 +97,19 @@ async def refresh(
 async def get_user(
     user_id: int,
     current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     """Get a user by ID (only own profile)."""
-    if current_user.id != user_id:
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalars().first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    if current_user.id != user.id:
         return JSONResponse(
             status_code=401,
             content={"message": "Unauthorized"},
         )
-    return UserResponse.model_validate(current_user)
+    return UserResponse.model_validate(user)
 
 
 @router.delete("/{user_id}")
@@ -101,11 +119,15 @@ async def delete_user(
     db: AsyncSession = Depends(get_db),
 ):
     """Delete a user by ID (only own account)."""
-    if current_user.id != user_id:
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalars().first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    if current_user.id != user.id:
         return JSONResponse(
             status_code=401,
             content={"message": "Unauthorized"},
         )
-    await db.delete(current_user)
+    await db.delete(user)
     await db.commit()
     return {"message": "Deleted"}
