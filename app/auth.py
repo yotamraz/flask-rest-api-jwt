@@ -8,7 +8,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -18,6 +18,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .config import settings
 from .database import get_db
 from .models import User
+
+
+class JWTAuthError(Exception):
+    """Raised for JWT/auth-related errors.
+
+    Flask-JWT-Extended returns ``{"msg": "..."}`` for all auth errors.
+    This custom exception lets us replicate that contract.
+    """
+
+    def __init__(self, msg: str, status_code: int = 401):
+        self.msg = msg
+        self.status_code = status_code
 
 # ---------------------------------------------------------------------------
 # Password hashing
@@ -81,19 +93,11 @@ def _decode_token(token: str) -> dict:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
     except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise JWTAuthError("Invalid or expired token")
     # Check blocklist
     jti = payload.get("jti")
     if jti and jti in token_blocklist:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has been revoked",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise JWTAuthError("Token has been revoked")
     return payload
 
 
@@ -101,47 +105,61 @@ def _decode_token(token: str) -> dict:
 # FastAPI dependencies
 # ---------------------------------------------------------------------------
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login", auto_error=True)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login", auto_error=False)
+
+
+def _require_token(token: str | None) -> str:
+    """Raise ``JWTAuthError`` when the Authorization header is absent."""
+    if token is None:
+        raise JWTAuthError("Missing Authorization Header")
+    return token
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    token: str | None = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
 ) -> User:
     """Validate an **access** token and return the corresponding User.
 
     Replaces Flask-JWT-Extended's ``@jwt_required()`` + ``get_jwt_identity()``.
     """
-    payload = _decode_token(token)
+    tok = _require_token(token)
+    payload = _decode_token(tok)
 
     if payload.get("token_type") != "access":
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Access token required",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise JWTAuthError("Access token required")
 
     user_id = payload.get("sub")
     if user_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token payload",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise JWTAuthError("Invalid token payload")
 
     result = await db.execute(select(User).where(User.id == int(user_id)))
     user = result.scalar_one_or_none()
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise JWTAuthError("User not found")
     return user
 
 
+async def get_validated_access_token(
+    token: str | None = Depends(oauth2_scheme),
+) -> dict:
+    """Validate an **access** token and return its claims (no DB lookup).
+
+    Used by logout where the user may no longer exist in the DB but the
+    token itself is still valid. Mirrors Flask-JWT-Extended ``@jwt_required()``
+    which only validates the token, not the user.
+    """
+    tok = _require_token(token)
+    payload = _decode_token(tok)
+
+    if payload.get("token_type") != "access":
+        raise JWTAuthError("Access token required")
+
+    return payload
+
+
 async def get_current_user_from_refresh(
-    token: str = Depends(oauth2_scheme),
+    token: str | None = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Validate a **refresh** token and return identity info.
@@ -149,22 +167,15 @@ async def get_current_user_from_refresh(
     Replaces Flask-JWT-Extended's ``@jwt_required(refresh=True)``.
     Returns a dict with ``user_id`` (str) so the router can issue a new access token.
     """
-    payload = _decode_token(token)
+    tok = _require_token(token)
+    payload = _decode_token(tok)
 
     if payload.get("token_type") != "refresh":
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Refresh token required",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise JWTAuthError("Refresh token required")
 
     user_id = payload.get("sub")
     if user_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token payload",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise JWTAuthError("Invalid token payload")
 
     return {"user_id": user_id}
 
@@ -174,9 +185,5 @@ def get_jti_from_token(token: str) -> str:
     payload = _decode_token(token)
     jti = payload.get("jti")
     if jti is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token missing jti claim",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise JWTAuthError("Token missing jti claim")
     return jti
