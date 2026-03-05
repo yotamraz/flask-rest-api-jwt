@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from .database import init_db
-from .routers import health
+from .routers import health, users
 
 
 @asynccontextmanager
@@ -28,6 +28,7 @@ def create_app() -> FastAPI:
 
     # Register routers (mirrors Flask blueprint registration)
     application.include_router(health.router)
+    application.include_router(users.router)
 
     return application
 
